@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TETRIS</title>
+    <style>
+        /* ==========================================
+           CSS: 画面の中央配置と基本的なスタイリング
+           ========================================== */
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #202028;
+            color: #ffffff;
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        #game-container {
+            text-align: center;
+            position: relative;
+        }
+
+        canvas {
+            border: 4px solid #3a3a4a;
+            background-color: #111116;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            display: block;
+            width: 315px;
+            height: 675px;
+            image-rendering: -moz-crisp-edges;
+            image-rendering: pixelated;
+        }
+
+        .controls-info {
+            margin-top: 15px;
+            font-size: 13px;
+            color: #8a8a9a;
+            line-height: 1.5;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="game-container">
+        <canvas id="gameCanvas" width="210" height="450"></canvas>
+        
+        <div class="controls-info">
+            操作方法: 矢印キー または WASD（移動 / 回転 / ソフトドロップ）<br>
+            🌟★マークマス: 特大ボーナス(500pt) / 💀グレーマス: 消すと**獲得ポイント半減**<br>
+            スコアだけでなく、時間経過（30秒ごと）でも速度が上がります！
+        </div>
+    </div>
+
+    <script>
+        // ==========================================
+        // JavaScript: TETRIS（リザルト画面カスタム版）
+        // ==========================================
+
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        const BLOCK_SIZE = 15; 
+        const COLS = 14;       
+        const ROWS = 30;       
+
+        const SCENE = {
+            TITLE: 'TITLE',
+            PLAY: 'PLAY',
+            RESULT: 'RESULT'
+        };
+        let currentScene = SCENE.TITLE;
+
+        let board = [];
+        let currentPiece = { x: 0, y: 0, shape: [] };
+
+        const SHAPES = [
+            [[1, 1, 1, 1]],         // 1: I型（水色）
+            [[2, 2], [2, 2]],       // 2: O型（黄色）
+            [[0, 3, 3], [3, 3, 0]], // 3: S型（緑）
+            [[4, 4, 0], [0, 4, 4]], // 4: Z型（赤）
+            [[5, 0, 0], [5, 5, 5]], // 5: J型（青）
+            [[0, 0, 6], [6, 6, 6]], // 6: L型（オレンジ）
+            [[0, 7, 0], [7, 7, 7]]  // 7: T型（紫）
+        ];
+
+        const COLORS = [
+            null,
+            '#00f0f0', '#f0f000', '#00f0f0', '#f00000', '#0000f0', '#f0a000', '#a000f0',
+            '#ffa500', // 8: ボーナスブロックのベース
+            '#555555'  // 9: お邪魔ブロック (ダークグレー)
+        ];
+
+        const keys = {
+            ArrowLeft: false, ArrowRight: false, ArrowUp: false, ArrowDown: false,
+            KeyA: false, KeyD: false, KeyW: false, KeyS: false,
+            Enter: false, Space: false
+        };
+        const prevKeys = { ...keys };
+
+        let dropCounter = 0;
+        const BASE_DROP_INTERVAL = 333; 
+        let currentDropInterval = 333;
+        let score = 0;                  
+
+        const SPEED_UP_STEP = 800;      
+        const TIME_UP_STEP = 30000;     
+
+        let lastTime = 0;               
+        let gameElapsedTime = 0;        
+
+        function init() {
+            window.addEventListener('keydown', (e) => {
+                if (e.code in keys) { keys[e.code] = true; e.preventDefault(); }
+            });
+            window.addEventListener('keyup', (e) => {
+                if (e.code in keys) { keys[e.code] = false; e.preventDefault(); }
+            });
+            requestAnimationFrame(gameLoop);
+        }
+
+        function startNewGame() {
+            board = Array.from({ length: ROWS }, () => Array(COLS).fill(0));
+            score = 0;
+            gameElapsedTime = 0; 
+            currentDropInterval = BASE_DROP_INTERVAL;
+            dropCounter = 0;
+            spawnPiece();
+            currentScene = SCENE.PLAY;
+        }
+
+        function spawnPiece() {
+            const randomType = Math.floor(Math.random() * SHAPES.length);
+            const baseShape = SHAPES[randomType];
+            
+            let clonedShape = baseShape.map(row => [...row]);
+
+            let validBlocks = [];
+            for (let r = 0; r < clonedShape.length; r++) {
+                for (let c = 0; c < clonedShape[r].length; c++) {
+                    if (clonedShape[r][c] !== 0) {
+                        validBlocks.push({ r: r, c: c });
+                    }
+                }
+            }
+
+            const rand = Math.random();
+            if (validBlocks.length > 0) {
+                const randomIndex = Math.floor(Math.random() * validBlocks.length);
+                const target = validBlocks[randomIndex];
+
+                if (rand < 0.10) {
+                    clonedShape[target.r][target.c] = 8; 
+                } else if (rand < 0.15) {
+                    clonedShape[target.r][target.c] = 9; 
+                }
+            }
+
+            currentPiece.shape = clonedShape;
+            currentPiece.x = Math.floor((COLS - currentPiece.shape[0].length) / 2);
+            currentPiece.y = 0;
+
+            if (checkCollision(currentPiece.x, currentPiece.y, currentPiece.shape)) {
+                currentScene = SCENE.RESULT;
+            }
+        }
+
+        function checkCollision(nextX, nextY, shape) {
+            for (let r = 0; r < shape.length; r++) {
+                for (let c = 0; c < shape[r].length; c++) {
+                    if (shape[r][c] !== 0) {
+                        const boardX = nextX + c;
+                        const boardY = nextY + r;
+                        if (boardX < 0 || boardX >= COLS || boardY >= ROWS) return true;
+                        if (boardY >= 0 && board[boardY][boardX] !== 0) return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        function lockPiece() {
+            for (let r = 0; r < currentPiece.shape.length; r++) {
+                for (let c = 0; c < currentPiece.shape[r].length; c++) {
+                    if (currentPiece.shape[r][c] !== 0) {
+                        const boardY = currentPiece.y + r;
+                        const boardX = currentPiece.x + c;
+                        if (boardY >= 0) board[boardY][boardX] = currentPiece.shape[r][c];
+                    }
+                }
+            }
+            clearLines();
+            spawnPiece();
+        }
+
+        function clearLines() {
+            for (let r = ROWS - 1; r >= 0; r--) {
+                const isLineFull = board[r].every(value => value !== 0);
+                const hasObstacle = board[r].includes(9);
+
+                if (isLineFull) {
+                    let lineScore = 100; 
+
+                    for (let c = 0; c < COLS; c++) {
+                        if (board[r][c] === 8) lineScore += 500; 
+                    }
+
+                    board.splice(r, 1);
+                    board.unshift(Array(COLS).fill(0));
+
+                    if (hasObstacle) {
+                        lineScore = Math.floor(lineScore / 2);
+                    }
+
+                    score += lineScore;
+                    r++; 
+                }
+            }
+        }
+
+        function rotatePiece() {
+            const shape = currentPiece.shape;
+            const n = shape.length; const m = shape[0].length;
+            let rotated = Array.from({ length: m }, () => Array(n).fill(0));
+            for (let r = 0; r < n; r++) {
+                for (let c = 0; c < m; c++) { rotated[c][n - 1 - r] = shape[r][c]; }
+            }
+            if (!checkCollision(currentPiece.x, currentPiece.y, rotated)) {
+                currentPiece.shape = rotated;
+            }
+        }
+
+        function update(deltaTime) {
+            if (currentScene === SCENE.TITLE) {
+                if ((keys.Enter && !prevKeys.Enter) || (keys.Space && !prevKeys.Space)) startNewGame();
+            } 
+            else if (currentScene === SCENE.PLAY) {
+                gameElapsedTime += deltaTime;
+
+                const scoreLevel = Math.floor(score / SPEED_UP_STEP);
+                const timeLevel = Math.floor(gameElapsedTime / TIME_UP_STEP);
+                const totalLevel = scoreLevel + timeLevel;
+                
+                currentDropInterval = BASE_DROP_INTERVAL * Math.pow(0.87, totalLevel);
+                
+                if (currentDropInterval < 16) currentDropInterval = 16;
+
+                if ((keys.ArrowLeft && !prevKeys.ArrowLeft) || (keys.KeyA && !prevKeys.KeyA)) {
+                    if (!checkCollision(currentPiece.x - 1, currentPiece.y, currentPiece.shape)) currentPiece.x--;
+                }
+                if ((keys.ArrowRight && !prevKeys.ArrowRight) || (keys.KeyD && !prevKeys.KeyD)) {
+                    if (!checkCollision(currentPiece.x + 1, currentPiece.y, currentPiece.shape)) currentPiece.x++;
+                }
+                if ((keys.ArrowUp && !prevKeys.ArrowUp) || (keys.KeyW && !prevKeys.KeyW)) rotatePiece();
+
+                dropCounter += deltaTime;
+                
+                let effectiveInterval = (keys.ArrowDown || keys.KeyS) ? (currentDropInterval / 4) : currentDropInterval;
+
+                if (dropCounter >= effectiveInterval) {
+                    if (!checkCollision(currentPiece.x, currentPiece.y + 1, currentPiece.shape)) {
+                        currentPiece.y++;
+                    } else {
+                        lockPiece();
+                    }
+                    dropCounter = 0;
+                }
+            } 
+            else if (currentScene === SCENE.RESULT) {
+                if ((keys.Enter && !prevKeys.Enter) || (keys.Space && !prevKeys.Space)) currentScene = SCENE.TITLE;
+            }
+            for (let key in keys) prevKeys[key] = keys[key];
+        }
+
+        function drawBlock(x, y, id) {
+            ctx.fillStyle = COLORS[id];
+            ctx.fillRect(x * BLOCK_SIZE, y * BLOCK_SIZE, BLOCK_SIZE - 1, BLOCK_SIZE - 1);
+
+            if (id === 8) {
+                ctx.save();
+                ctx.fillStyle = '#ffffff'; 
+                
+                const cx = x * BLOCK_SIZE + (BLOCK_SIZE / 2);
+                const cy = y * BLOCK_SIZE + (BLOCK_SIZE / 2);
+                
+                ctx.beginPath();
+                ctx.translate(cx, cy);
+                ctx.rotate((Math.PI / 180) * 180); 
+                
+                const spikes = 5;       
+                const outerRadius = 5;  
+                const innerRadius = 2;  
+                let rot = (Math.PI / 2) * 3;
+                let step = Math.PI / spikes;
+
+                ctx.moveTo(0, -outerRadius);
+                for (let i = 0; i < spikes; i++) {
+                    let px = Math.cos(rot) * outerRadius;
+                    let py = Math.sin(rot) * outerRadius;
+                    ctx.lineTo(px, py);
+                    rot += step;
+
+                    px = Math.cos(rot) * innerRadius;
+                    py = Math.sin(rot) * innerRadius;
+                    ctx.lineTo(px, py);
+                    rot += step;
+                }
+                ctx.lineTo(0, -outerRadius);
+                ctx.closePath();
+                ctx.fill();
+                ctx.restore();
+            }
+        }
+
+        function render() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            if (currentScene === SCENE.TITLE) {
+                ctx.fillStyle = '#ffffff'; ctx.font = 'bold 26px sans-serif'; ctx.textAlign = 'center';
+                ctx.fillText('TETRIS', canvas.width / 2, canvas.height / 2 - 40);
+                ctx.font = '12px sans-serif'; ctx.fillStyle = '#a0a0ff';
+                ctx.fillText('PRESS ENTER TO START', canvas.width / 2, canvas.height / 2 + 20);
+            } 
+            else if (currentScene === SCENE.PLAY) {
+                for (let r = 0; r < ROWS; r++) {
+                    for (let c = 0; c < COLS; c++) {
+                        if (board[r][c] !== 0) {
+                            drawBlock(c, r, board[r][c]);
+                        }
+                    }
+                }
+                for (let r = 0; r < currentPiece.shape.length; r++) {
+                    for (let c = 0; c < currentPiece.shape[r].length; c++) {
+                        if (currentPiece.shape[r][c] !== 0) {
+                            drawBlock(currentPiece.x + c, currentPiece.y + r, currentPiece.shape[r][c]);
+                        }
+                    }
+                }
+                ctx.fillStyle = '#ffffff'; ctx.font = '12px sans-serif'; ctx.textAlign = 'left';
+                ctx.fillText(`SCORE: ${score}`, 10, 20);
+                
+                const displaySpeed = Math.round((1000 / currentDropInterval) * 10) / 10;
+                ctx.fillText(`SPEED: ${displaySpeed}x`, 10, 38);
+
+                const seconds = Math.floor(gameElapsedTime / 1000);
+                ctx.textAlign = 'right';
+                ctx.fillText(`TIME: ${seconds}s`, canvas.width - 10, 20);
+            } 
+            else if (currentScene === SCENE.RESULT) {
+                // 【変更】GAMEOVERを廃止し、「YOUR SCORE」を綺麗に表示
+                ctx.fillStyle = '#ffffff'; ctx.font = 'bold 18px sans-serif'; ctx.textAlign = 'center';
+                ctx.fillText('YOUR SCORE', canvas.width / 2, canvas.height / 2 - 30);
+                
+                // 数字を大きくして主役に
+                ctx.font = 'bold 32px sans-serif'; ctx.fillStyle = '#ffa500'; // スコアを鮮やかなオレンジ色に
+                ctx.fillText(`${score}`, canvas.width / 2, canvas.height / 2 + 15);
+                
+                // 次への案内
+                ctx.font = '12px sans-serif'; ctx.fillStyle = '#8a8a9a';
+                ctx.fillText('PRESS ENTER TO TITLE', canvas.width / 2, canvas.height / 2 + 65);
+            }
+        }
+
+        function gameLoop(timestamp) {
+            if (!lastTime) lastTime = timestamp;
+            const deltaTime = timestamp - lastTime; lastTime = timestamp;
+            update(deltaTime); render();
+            requestAnimationFrame(gameLoop);
+        }
+        window.onload = init;
+    </script>
+</body>
+</html>

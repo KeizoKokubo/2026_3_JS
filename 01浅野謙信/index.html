@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- 
+     【タイトル設定】
+     ゲームのタイトルを変更したい場合は、ここを書き換えてください。
+  -->
+  <title>MAZE SHIFT (メイズ・シフト) - ターン制2D迷路対戦ゲーム</title>
+
+  <!-- スタイルシートの読み込み -->
+  <link rel="stylesheet" href="style.css">
+
+  <!-- Google Fonts からモダンなフォントを読み込み（日本語対応） -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&family=Outfit:wght@400;600;800;900&display=swap"
+    rel="stylesheet">
+</head>
+
+<body>
+
+  <!-- ==========================================================================
+     1. ヘッダー（ナビゲーションバー）
+     ========================================================================== -->
+  <header>
+    <div class="container">
+      <!-- ロゴ・ゲームタイトル -->
+      <a href="#" class="logo">MAZE SHIFT</a>
+
+      <!-- メニューリンク（クリックすると各セクションに移動します） -->
+      <nav>
+        <ul>
+          <li><a href="#hero">ホーム</a></li>
+          <li><a href="#about">特徴</a></li>
+          <li><a href="#characters">キャラクター</a></li>
+          <li><a href="#rules">ルール</a></li>
+          <li><a href="#gallery">ギャラリー</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <!-- ==========================================================================
+     2. ヒーローセクション（メインビジュアル）
+     ========================================================================== -->
+  <section id="hero">
+    <div class="container">
+      <div class="hero-wrapper">
+        <!-- 左側：キャッチコピーとボタン -->
+        <div class="hero-content">
+          <h1>
+            迷宮を創造し、<br>
+            <span>生き残れ。</span>
+          </h1>
+          <p>
+            1対1で戦うターン制オンライン迷路対戦ゲーム。ある時は迷路の設計者となって敵の行く手を阻み、またある時は脱出者となって特殊能力を活かして迷路を突破せよ！
+          </p>
+
+          <div class="hero-buttons">
+            <!-- 
+               【リンク設定】
+               ゲームのプレイ画面へ遷移させたい場合は、
+               href="#" の部分に「play.html」や「http://...」のようにリンク先を設定してください。
+            -->
+            <a href="https://ak02-24.github.io/game_2026_07_Nkadai.github.io/" class="btn-neon">ゲームをプレイ</a>
+            <a href="#about" class="btn-sub">ゲーム紹介を見る</a>
+          </div>
+        </div>
+
+        <!-- 右側：メインビジュアル画像枠 -->
+        <div class="hero-visual">
+          <!-- 
+             【画像を配置したい場合】
+             以下の <div class="image-box"> 内の <img src=""> に、
+             表示したい画像ファイルのパス（例：images/hero.png）を書き込んでください。
+             画像が無い場合は、自動的に美しいダミー背景が表示されます。
+          -->
+          <div class="image-box">
+            <img src="タイトル.png" alt="ゲームメイン画面">
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==========================================================================
+     3. ABOUT セクション（ゲームの特徴）
+     ========================================================================== -->
+  <section id="about">
+    <div class="container">
+      <h2 class="section-title">GAME FEATURES</h2>
+
+      <div class="about-grid">
+        <!-- 特徴1 -->
+        <div class="glass-panel about-card">
+          <div class="about-icon">🛡️</div>
+          <h3>創り手と逃げ手の攻防</h3>
+          <p>プレイヤーは「迷路制作者」と「脱出者」の役割をターン毎に交代。自分が作った迷路で相手を惑わせ、相手の作った迷路を攻略を楽しめます。</p>
+        </div>
+
+        <!-- 特徴2 -->
+        <div class="glass-panel about-card">
+          <div class="about-icon">⚡</div>
+          <h3>逆転を生む特殊能力</h3>
+          <p>「壁を壊す」「壁をすり抜ける」「罠を設置する」など、キャラクターごとに異なる能力。いつ、どこで使うかが勝敗の鍵を握ります。</p>
+        </div>
+
+        <!-- 特徴3 -->
+        <div class="glass-panel about-card">
+          <div class="about-icon">🌐</div>
+          <h3>オンライン対戦対応</h3>
+          <p>一対一のオンライン通信対戦に対応。1台のPCで2人が交互に操作して競い合えるモードも搭載しています。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==========================================================================
+     4. CHARACTERS セクション（キャラクター紹介）
+     ========================================================================== -->
+  <section id="characters">
+    <div class="container">
+      <h2 class="section-title">CHARACTERS</h2>
+
+      <div class="characters-grid">
+
+        <!-- キャラクター1: クラッシャー -->
+        <div class="glass-panel character-card char-crusher">
+          <div class="char-img-area">
+            <!-- 
+               【クラッシャーの画像を配置する場合】
+               以下の <img> の src に画像パスを設定してください。
+            -->
+            <div class="image-box">
+              <img src="" alt="クラッシャー">
+            </div>
+          </div>
+          <div class="char-info">
+            <div class="char-name">
+              クラッシャー <span class="char-class">CRUSHER</span>
+            </div>
+            <p class="char-desc">破壊と制限を得意とする、真っ赤な姿の重装甲キャラクター。</p>
+
+            <div class="char-abilities">
+              <div class="ability-row">
+                <span class="ability-label" style="color: var(--color-crusher)">作成時</span>
+                <span class="ability-text">一度通ると二度と通れなくなる床を2個設置できる。</span>
+              </div>
+              <div class="ability-row">
+                <span class="ability-label" style="color: var(--color-crusher)">脱出時</span>
+                <span class="ability-text">目の前を塞ぐ壁を1回だけ叩き壊して強引に進むことができる。</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- キャラクター2: ゴースト -->
+        <div class="glass-panel character-card char-ghost">
+          <div class="char-img-area">
+            <!-- 
+               【ゴーストの画像を配置する場合】
+               以下の <img> の src に画像パスを設定してください。
+            -->
+            <div class="image-box">
+              <img src="" alt="ゴースト">
+            </div>
+          </div>
+          <div class="char-info">
+            <div class="char-name">
+              ゴースト <span class="char-class">GHOST</span>
+            </div>
+            <p class="char-desc">錯覚と透ける体を操る、妖しく紫に揺らめくトリックスター。</p>
+
+            <div class="char-abilities">
+              <div class="ability-row">
+                <span class="ability-label" style="color: var(--color-ghost)">作成時</span>
+                <span class="ability-text">見た目は壁だが実際には通り抜けられる「隠し壁」を2個設置できる。</span>
+              </div>
+              <div class="ability-row">
+                <span class="ability-label" style="color: var(--color-ghost)">脱出時</span>
+                <span class="ability-text">1マス分の薄い壁なら1回だけすり抜けてショートカットできる。</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- キャラクター3: ディフェンダー -->
+        <div class="glass-panel character-card char-defender">
+          <div class="char-img-area">
+            <!-- 
+               【ディフェンダーの画像を配置する場合】
+               以下の <img> の src に画像パスを設定してください。
+            -->
+            <div class="image-box">
+              <img src="" alt="ディフェンダー">
+            </div>
+          </div>
+          <div class="char-info">
+            <div class="char-name">
+              ディフェンダー <span class="char-class">DEFENDER</span>
+            </div>
+            <p class="char-desc">視界遮断と絶対防御を誇る、冷徹で青い守護のスペシャリスト。</p>
+
+            <div class="char-abilities">
+              <div class="ability-row">
+                <span class="ability-label" style="color: var(--color-defender)">作成時</span>
+                <span class="ability-text">周囲5×5マス以外が全て暗闇に包まれる特殊な床を1個設置できる。</span>
+              </div>
+              <div class="ability-row">
+                <span class="ability-label" style="color: var(--color-defender)">脱出時</span>
+                <span class="ability-text">迷路内の危険なダメージ（罠やビーム）を1回だけ完全に無効化する。</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ==========================================================================
+     5. SYSTEM / RULES セクション（ゲームシステムとルール）
+     ========================================================================== -->
+  <section id="rules">
+    <div class="container">
+      <h2 class="section-title">GAME RULES</h2>
+
+      <div class="rules-wrapper">
+        <!-- 左側：ルールのリスト -->
+        <div class="rules-list">
+          <!-- ルール1 -->
+          <div class="glass-panel rule-item">
+            <div class="rule-num">1</div>
+            <div class="rule-text">
+              <h4>ターン交代制（最大6往復）</h4>
+              <p>攻守交代を1往復とし、最大6往復の計12ターンを競います。お互いに迷路の「作成」と「脱出」を同じ数だけ体験します。</p>
+            </div>
+          </div>
+
+          <!-- ルール2 -->
+          <div class="glass-panel rule-item">
+            <div class="rule-num">2</div>
+            <div class="rule-text">
+              <h4>ライフ制の勝負（初期ライフ各3）</h4>
+              <p>脱出側がゴールできればライフ維持。ゴールに失敗（タイムアップや死亡）するとライフを1失います。先に相手のライフを0にするか、6往復終了時点でライフが多い方の勝利です。</p>
+            </div>
+          </div>
+
+          <!-- ルール3 -->
+          <div class="glass-panel rule-item">
+            <div class="rule-num">3</div>
+            <div class="rule-text">
+              <h4>迷路作成時の注意</h4>
+              <p>迷路作成フェーズでは、スタートからゴールまでが物理的に繋がっている必要があります。絶対にクリアできない迷路は作れません。</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- 右側：ルール解説用の画像枠 -->
+        <div class="rules-visual">
+          <!-- 
+             【ルール解説画像を配置する場合】
+             以下の <img> の src に画像パスを設定してください。
+          -->
+          <div class="image-box">
+            <img src="" alt="ルール解説図">
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==========================================================================
+     6. GALLERY セクション（スクリーンショット一覧）
+     ========================================================================== -->
+  <section id="gallery">
+    <div class="container">
+      <h2 class="section-title">SCREENSHOTS</h2>
+
+      <div class="gallery-grid">
+        <!-- 画像枠1 -->
+        <div class="gallery-item">
+          <!-- 
+             【スクリーンショット画像を配置する場合】
+             以下の <img> の src に画像パスを設定してください。
+          -->
+          <div class="image-box">
+            <img src="" alt="プレイ画面1">
+          </div>
+        </div>
+
+        <!-- 画像枠2 -->
+        <div class="gallery-item">
+          <div class="image-box">
+            <img src="" alt="プレイ画面2">
+          </div>
+        </div>
+
+        <!-- 画像枠3 -->
+        <div class="gallery-item">
+          <div class="image-box">
+            <img src="" alt="プレイ画面3">
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==========================================================================
+     7. フッター
+     ========================================================================== -->
+  <footer>
+    <div class="container">
+      <div class="footer-content">
+        <!-- ロゴ -->
+        <div class="footer-logo">MAZE <span>SHIFT</span></div>
+
+        <!-- 
+           【リンクの追加と変更】
+           Twitter(X)やDiscordなどへのリンクです。
+           href="#" を各サービスのURL（例: https://twitter.com/username ）に書き換えてください。
+           他のリンクを増やしたい場合は、この <div class="social-links"> 内に
+           同じような <a> タグを追加するだけで簡単に増やせます。
+        -->
+        <div class="social-links">
+          <a href="#" target="_blank" class="social-btn">GitHub</a>
+        </div>
+      </div>
+
+      <!-- 著作権表示 -->
+      <div class="copyright">
+        &copy; 2026 MAZE SHIFT. All Rights Reserved.
+      </div>
+    </div>
+  </footer>
+
+</body>
+
+</html>

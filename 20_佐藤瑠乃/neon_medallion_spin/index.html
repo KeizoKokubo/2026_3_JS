@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Neon Medallion Spin</title>
+    <style>
+      :root {
+        --bg: #050816;
+        --panel: rgba(9, 16, 39, 0.9);
+        --line: #34f5ff;
+        --pink: #ff4fd8;
+        --yellow: #ffd86b;
+        --text: #e8f9ff;
+      }
+
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        font-family: "Segoe UI", "Yu Gothic", sans-serif;
+        color: var(--text);
+        background:
+          radial-gradient(circle at top left, rgba(52,245,255,0.18), transparent 25%),
+          radial-gradient(circle at bottom right, rgba(255,79,216,0.2), transparent 30%),
+          var(--bg);
+        display: grid;
+        place-items: center;
+        overflow: hidden;
+      }
+
+      body::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        background-image: linear-gradient(rgba(255,255,255,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.06) 1px, transparent 1px);
+        background-size: 42px 42px;
+        opacity: 0.12;
+        pointer-events: none;
+      }
+
+      .game {
+        width: min(96vw, 980px);
+        padding: 24px;
+        border: 1px solid rgba(255,255,255,0.16);
+        background: var(--panel);
+        border-radius: 28px;
+        box-shadow: 0 0 40px rgba(52,245,255,0.2), inset 0 0 40px rgba(255,255,255,0.04);
+        backdrop-filter: blur(18px);
+      }
+
+      .layout {
+        display: grid;
+        grid-template-columns: 220px 1fr;
+        gap: 18px;
+        align-items: start;
+      }
+
+      .title {
+        text-align: center;
+        margin-bottom: 16px;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        font-size: clamp(1.3rem, 2.2vw, 1.85rem);
+        color: #ffffff;
+        text-shadow: 0 0 10px var(--line), 0 0 20px var(--pink);
+      }
+
+      .hud {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin-bottom: 16px;
+      }
+
+      .chip {
+        flex: 1;
+        min-width: 140px;
+        padding: 12px 14px;
+        border-radius: 14px;
+        background: rgba(255,255,255,0.05);
+        border: 1px solid rgba(255,255,255,0.1);
+        box-shadow: inset 0 0 16px rgba(52,245,255,0.08);
+      }
+
+      .chip strong { display: block; font-size: 0.8rem; color: #8ff6ff; margin-bottom: 4px; letter-spacing: 0.1em; }
+      .chip span { font-size: 1.1rem; font-weight: 700; }
+
+      .board {
+        position: relative;
+        padding: 16px;
+        border-radius: 22px;
+        background: linear-gradient(145deg, rgba(8,15,35,0.95), rgba(3,7,18,0.95));
+        border: 1px solid rgba(52,245,255,0.3);
+        overflow: hidden;
+      }
+
+      .payout-panel {
+        padding: 14px;
+        border-radius: 18px;
+        background: rgba(255,255,255,0.05);
+        border: 1px solid rgba(255,255,255,0.12);
+      }
+
+      .payout-panel h3 {
+        margin: 0 0 10px;
+        font-size: 1rem;
+        color: #8ff6ff;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .payout-list {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .payout-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px 10px;
+        border-radius: 10px;
+        background: rgba(255,255,255,0.04);
+        border: 1px solid rgba(255,255,255,0.08);
+        font-size: 0.95rem;
+      }
+
+      .payout-item .symbol-name {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-weight: 700;
+        font-size: 1rem;
+      }
+
+      .payout-item .multiplier {
+        color: var(--yellow);
+        font-weight: 700;
+      }
+
+      .board::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(90deg, transparent, rgba(52,245,255,0.12), transparent);
+        transform: translateX(-100%);
+        animation: shimmer 4s linear infinite;
+        pointer-events: none;
+      }
+
+      .reels {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+        margin-bottom: 18px;
+      }
+
+      .reel {
+        position: relative;
+        height: 220px;
+        border-radius: 18px;
+        overflow: hidden;
+        border: 1px solid rgba(255,255,255,0.18);
+        background: radial-gradient(circle at top, rgba(52,245,255,0.22), transparent 50%), rgba(4,9,23,0.95);
+        box-shadow: inset 0 0 24px rgba(255,255,255,0.06);
+      }
+
+      .reel::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        border: 2px solid rgba(255,255,255,0.08);
+        pointer-events: none;
+      }
+
+      .reel-track {
+        position: absolute;
+        width: 100%;
+        top: 0;
+        left: 0;
+        will-change: transform;
+      }
+
+      .symbol {
+        height: 70px;
+        display: grid;
+        place-items: center;
+        font-size: 2rem;
+        text-shadow: 0 0 10px rgba(255,255,255,0.4);
+      }
+
+      .controls {
+        display: flex;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 12px;
+      }
+
+      button {
+        border: 0;
+        cursor: pointer;
+        color: white;
+        padding: 12px 20px;
+        border-radius: 999px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+      }
+
+      button:hover { transform: translateY(-2px); }
+      button:active { transform: translateY(1px); }
+
+      .spin-btn {
+        background: linear-gradient(90deg, var(--line), var(--pink));
+        box-shadow: 0 0 20px rgba(52,245,255,0.3), 0 0 28px rgba(255,79,216,0.2);
+      }
+
+      .reset-btn {
+        background: rgba(255,255,255,0.08);
+        border: 1px solid rgba(255,255,255,0.2);
+      }
+
+      .message {
+        margin-top: 16px;
+        text-align: center;
+        min-height: 28px;
+        color: #bdf8ff;
+        font-weight: 600;
+        text-shadow: 0 0 6px rgba(255,255,255,0.2);
+      }
+
+      .message.win { color: var(--yellow); text-shadow: 0 0 12px rgba(255,216,107,0.45); }
+      .message.lose { color: #ff8ea8; text-shadow: 0 0 10px rgba(255,142,168,0.35); }
+
+      .rules {
+        margin-top: 14px;
+        padding: 12px 14px;
+        border-radius: 14px;
+        background: rgba(255,255,255,0.05);
+        border: 1px solid rgba(255,255,255,0.12);
+        font-size: 0.95rem;
+        line-height: 1.6;
+      }
+
+      .rules strong {
+        color: #8ff6ff;
+      }
+
+      .rules ul {
+        margin: 8px 0 0 18px;
+        padding: 0;
+      }
+
+      @keyframes shimmer {
+        to { transform: translateX(100%); }
+      }
+
+      @media (max-width: 700px) {
+        .game { padding: 16px; }
+        .layout { grid-template-columns: 1fr; }
+        .reels { grid-template-columns: 1fr; }
+        .reel { height: 170px; }
+        .symbol { height: 56px; font-size: 1.7rem; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="game">
+      <h1 class="title">NEON MEDALLION SPIN</h1>
+      <div class="hud">
+        <div class="chip"><strong>Balance</strong><span id="balance">1000</span></div>
+        <div class="chip"><strong>Bet</strong><span id="bet">50</span></div>
+        <div class="chip"><strong>Win</strong><span id="win">0</span></div>
+      </div>
+
+      <div class="layout">
+        <aside class="payout-panel">
+          <h3>勝ち額一覧</h3>
+          <div class="payout-list" id="payoutList"></div>
+        </aside>
+
+        <div class="board">
+          <div class="reels">
+            <div class="reel"><div class="reel-track" id="reel-0"></div></div>
+            <div class="reel"><div class="reel-track" id="reel-1"></div></div>
+            <div class="reel"><div class="reel-track" id="reel-2"></div></div>
+          </div>
+          <div class="controls">
+            <button class="spin-btn" id="spinBtn">Spin</button>
+            <button class="reset-btn" id="resetBtn">Reset</button>
+          </div>
+          <div class="message" id="message">Good luck, neon runner.</div>
+          <div class="rules">
+            <strong>ルール</strong>
+            <ul>
+              <li>Spinを押すと3つのリールが回ります。</li>
+              <li>横のラインで3つのリールが同じシンボルで揃うと勝ちです。</li>
+              <li>シンボルによって配当が変わります。低配当ほど揃いやすいです。</li>
+              <li>2つだけ揃っても勝ちにはなりません。</li>
+              <li>1回のBetは50、勝ち額は配当で加算されます。</li>
+              <li>残高が足りないと回せません。</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const symbolData = [
+        { symbol: '🔥', multiplier: 1.5, weight: 18 },
+        { symbol: '💜', multiplier: 2, weight: 12 },
+        { symbol: '🌙', multiplier: 3, weight: 8 },
+        { symbol: '⚡', multiplier: 4.5, weight: 5 },
+        { symbol: '⭐', multiplier: 6, weight: 2 },
+        { symbol: '💎', multiplier: 10, weight: 1 },
+      ];
+      const symbols = symbolData.map((item) => item.symbol);
+      const tracks = Array.from(document.querySelectorAll('.reel-track'));
+      const balanceEl = document.getElementById('balance');
+      const betEl = document.getElementById('bet');
+      const winEl = document.getElementById('win');
+      const messageEl = document.getElementById('message');
+      const spinBtn = document.getElementById('spinBtn');
+      const resetBtn = document.getElementById('resetBtn');
+      const payoutListEl = document.getElementById('payoutList');
+
+      let balance = 1000;
+      let bet = 50;
+      let win = 0;
+      let spinning = false;
+      let reelSequences = [];
+
+      function buildTrack(reelIndex) {
+        const track = tracks[reelIndex];
+        const reelSymbols = [...symbols];
+        for (let i = reelSymbols.length - 1; i > 0; i -= 1) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [reelSymbols[i], reelSymbols[j]] = [reelSymbols[j], reelSymbols[i]];
+        }
+
+        reelSequences[reelIndex] = reelSymbols;
+
+        const items = [];
+        for (let i = 0; i < 120; i += 1) {
+          items.push(`<div class="symbol">${reelSymbols[i % reelSymbols.length]}</div>`);
+        }
+        track.innerHTML = items.join('');
+        track.style.transform = 'translateY(0px)';
+      }
+
+      function render() {
+        balanceEl.textContent = balance;
+        betEl.textContent = bet;
+        winEl.textContent = win;
+
+        const sortedPayouts = [...symbolData].sort((a, b) => a.multiplier - b.multiplier);
+        payoutListEl.innerHTML = sortedPayouts.map((item) => `
+          <div class="payout-item">
+            <span class="symbol-name"><span>${item.symbol}</span></span>
+            <span class="multiplier">x${item.multiplier}</span>
+          </div>
+        `).join('');
+      }
+
+      function spinReel(track, reelIndex, targetSymbol, duration) {
+        return new Promise((resolve) => {
+          const symbolHeight = 70;
+          const extraSpins = 12;
+          const reelOrder = reelSequences[reelIndex] || symbols;
+          const targetIndex = reelOrder.indexOf(targetSymbol);
+          const finalOffset = (extraSpins * reelOrder.length + targetIndex) * symbolHeight;
+          track.style.transition = `transform ${duration}ms cubic-bezier(.17,.67,.67,1.2)`;
+          track.style.transform = `translateY(-${finalOffset}px)`;
+          setTimeout(() => {
+            const visibleIndex = Math.round(finalOffset / symbolHeight);
+            const visibleSymbol = track.children[visibleIndex]?.textContent?.trim() || targetSymbol;
+            resolve({ stoppedSymbol: visibleSymbol });
+          }, duration);
+        });
+      }
+
+      function getStoppedSymbols(result) {
+        return result.map((item) => item.stoppedSymbol);
+      }
+
+      function resetReels() {
+        tracks.forEach((track) => {
+          track.style.transition = 'none';
+          track.style.transform = 'translateY(0px)';
+          track.getBoundingClientRect();
+        });
+      }
+
+      function getSymbolInfo(symbol) {
+        return symbolData.find((item) => item.symbol === symbol);
+      }
+
+      function evaluate(result) {
+        const symbolsOnReels = getStoppedSymbols(result);
+        const horizontalWin = symbolsOnReels.every((symbol) => symbol === symbolsOnReels[0]);
+
+        if (horizontalWin) {
+          const symbolInfo = getSymbolInfo(symbolsOnReels[0]);
+          const payout = Math.round(bet * symbolInfo.multiplier);
+          return {
+            payout,
+            text: `${symbolInfo.symbol} 3つ揃い！配当 ${symbolInfo.multiplier}倍！`,
+            className: 'win',
+          };
+        }
+        return { payout: 0, text: '揃わなかった…。もう一度試して。', className: 'lose' };
+      }
+
+      async function playSpin() {
+        if (spinning || balance < bet) {
+          messageEl.textContent = balance < bet ? 'Not enough balance.' : 'Already spinning.';
+          if (balance < bet) messageEl.className = 'message lose';
+          return;
+        }
+
+        spinning = true;
+        spinBtn.disabled = true;
+        resetReels();
+        messageEl.className = 'message';
+        messageEl.textContent = 'Reels are glowing...';
+        balance -= bet;
+        render();
+
+        const weightedSymbols = [];
+        symbolData.forEach((item) => {
+          for (let i = 0; i < item.weight; i += 1) {
+            weightedSymbols.push(item.symbol);
+          }
+        });
+
+        const promises = tracks.map((track, index) => {
+          const targetSymbol = weightedSymbols[Math.floor(Math.random() * weightedSymbols.length)];
+          const duration = 1800 + index * 250 + Math.floor(Math.random() * 250);
+          return spinReel(track, index, targetSymbol, duration);
+        });
+
+        const result = await Promise.all(promises);
+        const outcome = evaluate(result);
+        balance += outcome.payout;
+        win = outcome.payout;
+        render();
+        messageEl.textContent = outcome.text;
+        messageEl.className = `message ${outcome.className}`;
+        spinning = false;
+        spinBtn.disabled = false;
+      }
+
+      function resetGame() {
+        balance = 1000;
+        bet = 50;
+        win = 0;
+        render();
+        tracks.forEach((track, index) => buildTrack(index));
+        messageEl.className = 'message';
+        messageEl.textContent = 'Fresh start. Try your luck.';
+      }
+
+      spinBtn.addEventListener('click', playSpin);
+      resetBtn.addEventListener('click', resetGame);
+
+      tracks.forEach((_, index) => buildTrack(index));
+      render();
+    </script>
+  </body>
+</html>

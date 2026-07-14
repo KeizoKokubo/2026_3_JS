@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>迷路ゲーム 紹介ページ</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #111;
+      color: #f5f5f5;
+    }
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 40px 20px 60px;
+    }
+    h1 {
+      font-size: 2.4rem;
+      margin-bottom: 0.5em;
+    }
+    h2 {
+      margin-top: 2em;
+      font-size: 1.6rem;
+      border-left: 4px solid #ffcc00;
+      padding-left: 8px;
+    }
+    p {
+      line-height: 1.8;
+    }
+    ul {
+      line-height: 1.8;
+      padding-left: 1.4em;
+    }
+    .tagline {
+      font-size: 1.1rem;
+      color: #ccc;
+      margin-bottom: 1.5em;
+    }
+    .badge {
+      display: inline-block;
+      background: #ffcc00;
+      color: #222;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 0.85rem;
+      margin-bottom: 1em;
+    }
+    .play-section {
+      margin-top: 2em;
+      text-align: center;
+    }
+    .play-button {
+      display: inline-block;
+      padding: 14px 32px;
+      background: #00c853;
+      color: #fff;
+      font-size: 1.1rem;
+      font-weight: bold;
+      border-radius: 999px;
+      text-decoration: none;
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+      transition: transform 0.1s ease, box-shadow 0.1s ease, background 0.2s ease;
+    }
+    .play-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.6);
+      background: #00e676;
+    }
+    .play-button:active {
+      transform: translateY(1px);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+    }
+    .footer {
+      margin-top: 3em;
+      font-size: 0.85rem;
+      color: #888;
+      text-align: center;
+    }
+    code {
+      background: #222;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <span class="badge">ブラウザゲーム / JavaScript / Canvas</span>
+    <h1>迷路ゲーム</h1>
+    <p class="tagline">コインを集めてスコアを稼ぎながら、ゴールを目指して脱出するシンプルな迷路ゲーム。</p>
+
+    <h2>🎮 概要</h2>
+    <p>
+      ゴールを目指す脱出ゲーム。<br>
+      迷路の中に散らばったコインを取りながら進み、ゴールにたどり着くとクリアになります。
+    </p>
+
+    <h2>🕹️ 遊び方</h2>
+    <ul>
+      <li><strong>[PC]</strong> 矢印キーでプレイヤーを移動</li>
+      <li>タイトル画面・クリア画面・ゲームオーバー画面では <code>スペースキー</code> で決定</li>
+      <li>コインを取るとスコアが増えます</li>
+      <li>ゴールに到達するとクリア画面に移ります</li>
+    </ul>
+
+    <h2>✨ 頑張ったところ</h2>
+    <ul>
+      <li>なるべくマップ移動した際にプレイヤーが壁に埋まらないように調整したこと</li>
+      <li>ランダムでマップ（迷路）を生成するようにしたこと</li>
+    </ul>
+
+    <h2>🌐 プレイURL</h2>
+<div class="play-section">
+  <a class="play-button" href="https://tomoyuki2005.github.io/game/" target="_blank">
+    ▶ プレイする
+  </a>
+  <p style="margin-top: 0.8em; font-size: 0.9rem; color: #bbb;">
+    ※GitHub Pages の公開URLに変更しました
+  </p>
+</div>
+
+
+    <div class="footer">
+      このページは VSCode で作成した JavaScript 迷路ゲームの紹介ページです。
+    </div>
+  </div>
+</body>
+</html>

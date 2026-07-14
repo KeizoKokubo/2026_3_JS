@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rhythm Mage Battle - リズム・メイジ・バトル 公式紹介ページ</title>
+    <!-- Tailwind CSS による爆速スタイリング -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 幻想的なフォントのロード -->
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans JP', sans-serif;
+            background-color: #03000a;
+            color: #f3f4f6;
+            overflow-x: hidden;
+        }
+        .font-fantasy {
+            font-family: 'Cinzel', serif;
+        }
+        /* ネオンに輝く3Dボタンのアニメーション */
+        .neon-btn {
+            position: relative;
+            transition: all 0.3s cubic-bezier(0.2, 1, 0.3, 1);
+            box-shadow: 0 0 20px rgba(168, 85, 247, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+        }
+        .neon-btn:hover {
+            box-shadow: 0 0 35px rgba(236, 72, 153, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+            transform: translateY(-4px);
+        }
+        .neon-btn:active {
+            transform: translateY(2px);
+            box-shadow: 0 0 10px rgba(168, 85, 247, 0.6);
+        }
+        /* ふわふわと浮遊するアニメーション */
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        .floating {
+            animation: float 4s ease-in-out infinite;
+        }
+
+        /* --- モックアップデモ用CSSアニメーション --- */
+        /* 火の玉（ファイアブレス）の移動 */
+        @keyframes fire-travel {
+            0% { transform: translate(0, 0) scale(1); opacity: 0; }
+            10% { opacity: 1; }
+            80% { transform: translate(160px, -20px) scale(1.4); opacity: 1; }
+            90% { transform: translate(180px, -20px) scale(1.8); opacity: 0; }
+            100% { transform: translate(180px, -20px) scale(1); opacity: 0; }
+        }
+        .demo-fire {
+            animation: fire-travel 3s infinite cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        /* 敵ドラゴンのダメージのけぞり・赤変化 */
+        @keyframes dragon-hurt {
+            0%, 75% { transform: translate(0, 0); filter: none; }
+            80% { transform: translate(10px, -5px); filter: brightness(1.5) sepia(1) saturate(5) hue-rotate(-50deg); }
+            85% { transform: translate(-5px, 2px); }
+            90% { transform: translate(2px, -1px); filter: none; }
+            100% { transform: translate(0, 0); }
+        }
+        .demo-dragon {
+            animation: dragon-hurt 3s infinite;
+        }
+
+        /* 詠唱率ゲージの自動上昇ループ */
+        @keyframes cast-fill {
+            0% { stroke-dashoffset: 201; } /* 2*pi*32 = 201 */
+            70% { stroke-dashoffset: 0; }
+            100% { stroke-dashoffset: 0; }
+        }
+        .demo-cast-circle {
+            stroke-dasharray: 201;
+            animation: cast-fill 3s infinite linear;
+        }
+
+        /* ノーツのスクロールアニメーション */
+        @keyframes note-scroll {
+            0% { transform: translateX(180px); opacity: 0; }
+            10% { opacity: 1; }
+            70% { transform: translateX(0px); opacity: 1; }
+            72% { transform: translateX(-5px) scale(1.1); opacity: 0; }
+            100% { transform: translateX(-20px); opacity: 0; }
+        }
+        .demo-note {
+            animation: note-scroll 2.5s infinite linear;
+        }
+
+        /* PERFECT文字のポップアップ */
+        @keyframes perfect-pop {
+            0%, 65% { transform: scale(0.6) translate(-50%, -50%); opacity: 0; }
+            70% { transform: scale(1.1) translate(-50%, -50%); opacity: 1; }
+            80% { transform: scale(1.0) translate(-50%, -50%); opacity: 1; }
+            90% { transform: scale(1.0) translate(-50%, -50%); opacity: 0; }
+            100% { transform: scale(1.0) translate(-50%, -50%); opacity: 0; }
+        }
+        .demo-perfect {
+            animation: perfect-pop 2.5s infinite ease-out;
+        }
+
+        /* 判定リングのパルス（リズムに合わせて波紋が広がる） */
+        @keyframes ring-pulse {
+            0%, 65% { transform: scale(1); opacity: 0.3; }
+            70% { transform: scale(1.25); opacity: 0.8; }
+            100% { transform: scale(1.5); opacity: 0; }
+        }
+        .demo-ring-pulse {
+            animation: ring-pulse 2.5s infinite ease-out;
+        }
+    </style>
+</head>
+<body class="relative">
+
+    <!-- ヒーロー背景用のパーティクル用Canvas -->
+    <canvas id="bgCanvas" class="absolute top-0 left-0 w-full h-[650px] pointer-events-none z-0 opacity-65"></canvas>
+
+    <!-- ヘッダーナビゲーション -->
+    <header class="relative z-10 w-full max-w-7xl mx-auto px-6 py-6 flex justify-between items-center">
+        <div class="flex items-center gap-2">
+            <span class="text-2xl">🧙‍♂️</span>
+            <span class="font-fantasy font-bold text-xl tracking-wider text-purple-400">RHYTHM MAGE</span>
+        </div>
+        <a href="https://tsumu07.github.io/HTMLGame/" target="_blank" class="px-5 py-2 bg-purple-900/40 hover:bg-purple-800/60 border border-purple-500/30 rounded-xl text-sm font-medium transition duration-200">
+            ゲーム本体を開く ➔
+        </a>
+    </header>
+
+    <!-- メインヒーローセクション -->
+    <section class="relative z-10 w-full max-w-5xl mx-auto px-6 pt-12 pb-24 text-center">
+        <div class="inline-block px-4 py-1.5 bg-gradient-to-r from-purple-950 to-pink-950 border border-purple-500/30 rounded-full text-xs md:text-sm text-purple-300 font-bold tracking-widest uppercase mb-6 shadow-[0_0_15px_rgba(168,85,247,0.15)]">
+            ✨ Web Audio API 搭載・超高精度同期リズムアクション
+        </div>
+        
+        <h1 class="text-4xl md:text-7xl font-fantasy font-black tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-500 to-amber-400 drop-shadow-[0_4px_12px_rgba(0,0,0,0.8)] leading-tight mb-6">
+            RHYTHM MAGE BATTLE
+        </h1>
+        
+        <p class="max-w-2xl mx-auto text-gray-300 text-sm md:text-lg mb-10 leading-relaxed">
+            鳴り響く魔導の律動をその手で刻め。BPMが加速するドラゴンの怒りをしのぎ、A・S・Dの魔法を切り替えて最強の一撃を放つ、ブラウザで即座に遊べる本格派2DリズムRPG！
+        </p>
+
+        <!-- ゲームをプレイするメイン3Dボタン -->
+        <div class="flex flex-col items-center gap-4 mb-16">
+            <a href="https://tsumu07.github.io/HTMLGame/" target="_blank" class="neon-btn inline-flex items-center gap-3 px-10 py-5 bg-gradient-to-r from-purple-600 via-pink-600 to-red-500 text-white font-black text-xl md:text-2xl rounded-2xl border-2 border-purple-300/40 tracking-wider">
+                <span>🪄</span> 今すぐゲームをプレイする！
+            </a>
+            <span class="text-xs text-purple-400 font-medium">※インストール不要・PC & スマホブラウザ両対応</span>
+        </div>
+
+        <!-- ゲーム画面プレビューエリア (動くCSSデモを追加してイメージを湧きやすく) -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto mt-8">
+            
+            <!-- プレビューカード1: バトル画面のダイナミックデモ -->
+            <div class="bg-gray-950/60 border border-purple-900/40 rounded-2xl p-5 shadow-2xl backdrop-blur-sm transform hover:scale-[1.02] transition duration-300">
+                <div class="overflow-hidden rounded-xl border-2 border-purple-500/20 mb-4 bg-gradient-to-b from-[#150d2a] to-[#06020c] aspect-[16/10] flex flex-col justify-between p-4 relative group">
+                    
+                    <!-- 背景の星屑 -->
+                    <div class="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(139,92,246,0.1)_0%,transparent_100%)]"></div>
+
+                    <!-- デモ上部のHUD -->
+                    <div class="flex justify-between items-center w-full z-10 text-[10px] text-gray-400 font-mono">
+                        <div>SCORE: <span class="text-amber-400 font-bold">12,400</span></div>
+                        <div class="text-pink-400 font-bold">32 COMBO</div>
+                        <div class="text-red-500 animate-pulse">BPM 152 ⚡</div>
+                    </div>
+
+                    <!-- メイン戦闘エリア (アニメーションモック) -->
+                    <div class="flex justify-between items-center px-4 my-auto relative w-full h-32 z-10">
+                        <!-- 魔法使い 🧙‍♂️ -->
+                        <div class="text-5xl relative z-10 select-none">
+                            🧙‍♂️
+                            <!-- 魔法チャージサークル -->
+                            <div class="absolute -inset-2 rounded-full border border-purple-500/30 animate-spin"></div>
+                        </div>
+
+                        <!-- 飛ぶ魔法弾 (ファイア) -->
+                        <div class="demo-fire absolute left-14 top-12 text-3xl select-none z-10">🔥</div>
+
+                        <!-- レッドドラゴン 🐉 -->
+                        <div class="demo-dragon text-6xl relative select-none z-10">
+                            🐉
+                            <!-- ドラゴンの影/オーラ -->
+                            <div class="absolute -inset-3 rounded-full bg-red-600/10 blur-md animate-pulse"></div>
+                        </div>
+                    </div>
+
+                    <!-- 両者のHPゲージ -->
+                    <div class="flex justify-between items-center w-full z-10 px-2">
+                        <div class="w-1/3">
+                            <div class="flex justify-between text-[8px] text-emerald-400 mb-0.5"><span>Player HP</span><span>70/100</span></div>
+                            <div class="w-full bg-gray-900 h-1.5 rounded-full overflow-hidden border border-gray-700">
+                                <div class="bg-emerald-500 h-full w-[70%]"></div>
+                            </div>
+                        </div>
+                        <div class="w-1/2">
+                            <div class="flex justify-between text-[8px] text-red-400 mb-0.5"><span>Dragon HP (Rage!)</span><span>124/300</span></div>
+                            <div class="w-full bg-gray-900 h-1.5 rounded-full overflow-hidden border border-red-700">
+                                <div class="bg-red-600 h-full w-[41%] animate-pulse"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ホバー時の実画像オーバーレイフォールバック (image_74bf1f.png or image_bd3003.png) -->
+                    <div class="absolute inset-0 bg-black/90 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-center items-center p-4">
+                        <img src="image_bd3003.png" alt="バトル画面" class="absolute inset-0 w-full h-full object-cover opacity-60" onerror="this.onerror=null; this.src='image_74bf1f.png';">
+                        <div class="z-10 text-center">
+                            <span class="text-xs text-purple-300 font-bold bg-purple-950/80 px-2 py-1 rounded border border-purple-500/30 mb-2 inline-block">戦闘の様子 (実際の画面レイアウト)</span>
+                            <p class="text-[11px] text-gray-300 px-4">HP状況に合わせて「A・S・D」を切り替え、戦局をコントロールする究極の戦術リズムアクション！</p>
+                        </div>
+                    </div>
+                </div>
+                <h3 class="text-lg font-bold text-purple-300 mb-1 flex items-center gap-2">
+                    <span>🧙‍♂️</span> 戦闘＆魔法切り替えシステム
+                </h3>
+                <p class="text-gray-400 text-xs md:text-sm text-left leading-relaxed">
+                    状況に応じて瞬時に魔法を選択可能。ファイア🔥でダメージ、シールド🛡️で防御、ヒール💖で回復など、魔導士らしい戦略的な戦闘を楽しめます。
+                </p>
+            </div>
+
+            <!-- プレビューカード2: 完全同期判定のダイナミックデモ -->
+            <div class="bg-gray-950/60 border border-purple-900/40 rounded-2xl p-5 shadow-2xl backdrop-blur-sm transform hover:scale-[1.02] transition duration-300">
+                <div class="overflow-hidden rounded-xl border-2 border-purple-500/20 mb-4 bg-gradient-to-b from-[#150d2a] to-[#06020c] aspect-[16/10] flex flex-col justify-center items-center relative group p-4">
+                    
+                    <!-- 背景の横ガイドライン -->
+                    <div class="w-full h-1.5 bg-white/10 absolute top-1/2 -translate-y-1/2"></div>
+
+                    <!-- 判定サークル＆詠唱進捗リング (22px 基準で精緻に表現) -->
+                    <div class="absolute left-1/4 top-1/2 -translate-y-1/2 -translate-x-1/2 z-10 flex flex-col items-center">
+                        <div class="relative w-[44px] h-[44px] flex items-center justify-center">
+                            <!-- 外郭プログレスリング（SVG） -->
+                            <svg class="absolute inset-0 w-full h-full transform -rotate-90" viewBox="0 0 72 72">
+                                <circle cx="36" cy="36" r="32" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="4"/>
+                                <circle class="demo-cast-circle" cx="36" cy="36" r="32" fill="none" stroke="#a78bfa" stroke-width="4" stroke-linecap="round"/>
+                            </svg>
+                            <!-- 白いジャスト判定サークル (22px) -->
+                            <div class="w-[44px] h-[44px] rounded-full border-[3px] border-white bg-white/5 shadow-[0_0_15px_rgba(255,255,255,0.8)]"></div>
+                            <!-- 判定パルス波紋 -->
+                            <div class="demo-ring-pulse absolute w-[44px] h-[44px] rounded-full border-2 border-purple-400"></div>
+                        </div>
+                        <span class="text-[10px] text-purple-400 font-bold mt-6">詠唱</span>
+                    </div>
+
+                    <!-- スクロールしてくる水晶玉ノーツ 🔮 -->
+                    <div class="demo-note absolute left-1/4 top-1/2 -translate-y-1/2 z-20 flex items-center justify-center">
+                        <div class="w-[44px] h-[44px] rounded-full border border-purple-400/50 bg-gradient-to-r from-purple-300 via-purple-500 to-purple-800 shadow-[0_0_12px_rgba(168,85,247,0.8)] flex items-center justify-center">
+                            <span class="text-xl">🔮</span>
+                        </div>
+                    </div>
+
+                    <!-- ぴったり重なった瞬間の「PERFECT!」テキスト -->
+                    <div class="demo-perfect absolute left-1/4 top-1/3 -translate-x-1/2 z-30 font-bold text-amber-400 text-xs tracking-wider bg-black/80 px-2 py-0.5 rounded border border-amber-400/30">
+                        ✨ PERFECT! ✨
+                    </div>
+
+                    <!-- ガイド説明 -->
+                    <div class="absolute bottom-4 text-[9px] text-gray-500 font-mono">
+                        ノーツの輪と判定リングの22px同心円がぴったり一致！
+                    </div>
+
+                    <!-- ホバー時の実画像オーバーレイフォールバック (image_74bf1f.png or image_cc89de.png) -->
+                    <div class="absolute inset-0 bg-black/90 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-center items-center p-4">
+                        <img src="image_cc89de.png" alt="ノーツ重なり判定" class="absolute inset-0 w-full h-full object-cover opacity-60" onerror="this.onerror=null; this.src='image_74bf1f.png';">
+                        <div class="z-10 text-center">
+                            <span class="text-xs text-pink-300 font-bold bg-pink-950/80 px-2 py-1 rounded border border-pink-500/30 mb-2 inline-block">完全同期判定 (実際の画面レイアウト)</span>
+                            <p class="text-[11px] text-gray-300 px-4">ノーツ外径と判定サークルを22pxで完璧にシンクロ。ズレのない極上の打鍵感をお約束します！</p>
+                        </div>
+                    </div>
+                </div>
+                <h3 class="text-lg font-bold text-pink-400 mb-1 flex items-center gap-2">
+                    <span>🔮</span> 完全同期型 22px 判定サークル
+                </h3>
+                <p class="text-gray-400 text-xs md:text-sm text-left leading-relaxed">
+                    ノーツと判定円のサイズを「22px」に完全統一。音が鳴るジャストの瞬間にぴったり同心円状に重なるため、プロ仕様の音ゲー判定を気持ちよく狙えます！
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- 特徴・システム解説 -->
+    <section class="bg-[#070212] py-20 border-t border-purple-950/40">
+        <div class="max-w-5xl mx-auto px-6">
+            <h2 class="text-3xl md:text-4xl font-fantasy text-center font-bold tracking-widest text-purple-200 mb-12">
+                GAME FEATURES
+            </h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- 特徴1 -->
+                <div class="bg-purple-950/20 border border-purple-900/20 rounded-2xl p-6 hover:border-purple-500/40 transition duration-300">
+                    <div class="w-12 h-12 rounded-xl bg-purple-900/50 flex items-center justify-center text-2xl mb-4 shadow-[0_0_15px_rgba(168,85,247,0.3)]">
+                        🔊
+                    </div>
+                    <h3 class="text-lg font-bold text-white mb-2">Web Audio API 同期</h3>
+                    <p class="text-gray-400 text-xs md:text-sm leading-relaxed">
+                        ブラウザ標準のサウンドAPIに完全に同期させた独自音源エンジンを搭載。入力のズレをミリ秒単位で判定するため、ズレのない快適な打鍵感を実現。
+                    </p>
+                </div>
+
+                <!-- 特徴2 -->
+                <div class="bg-purple-950/20 border border-purple-900/20 rounded-2xl p-6 hover:border-purple-500/40 transition duration-300">
+                    <div class="w-12 h-12 rounded-xl bg-pink-900/50 flex items-center justify-center text-2xl mb-4 shadow-[0_0_15px_rgba(236,72,153,0.3)]">
+                        ⚡
+                    </div>
+                    <h3 class="text-lg font-bold text-white mb-2">怒りの加速BPMシステム</h3>
+                    <p class="text-gray-400 text-xs md:text-sm leading-relaxed">
+                        ボスの残りHPが半分以下になると怒り状態へ突入！戦闘BGMが自動的に加速(BPM120→152)し、リズム譜面が一気に凶悪化するスリリングな仕掛け。
+                    </p>
+                </div>
+
+                <!-- 特徴3 -->
+                <div class="bg-purple-950/20 border border-purple-900/20 rounded-2xl p-6 hover:border-purple-500/40 transition duration-300">
+                    <div class="w-12 h-12 rounded-xl bg-amber-900/50 flex items-center justify-center text-2xl mb-4 shadow-[0_0_15px_rgba(245,158,11,0.3)]">
+                        🛡️
+                    </div>
+                    <h3 class="text-lg font-bold text-white mb-2">3系統の詠唱スペル</h3>
+                    <p class="text-gray-400 text-xs md:text-sm leading-relaxed">
+                        ファイア、シールド、ヒールの魔法を戦闘中にいつでも選択。ジャストタイミングでリズムを叩き、詠唱率を100%にすることで魔法が自動発動！
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 操作方法エリア -->
+    <section class="py-20 max-w-4xl mx-auto px-6 text-center">
+        <h2 class="text-2xl md:text-3xl font-fantasy font-bold tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400 mb-10">
+            HOW TO PLAY
+        </h2>
+
+        <div class="bg-gray-950/80 border border-purple-900/30 rounded-2xl p-8 max-w-2xl mx-auto shadow-xl">
+            <div class="flex flex-col sm:flex-row justify-center items-center gap-8 mb-8">
+                <!-- 魔法選択キー -->
+                <div>
+                    <p class="text-xs text-gray-500 mb-3">魔法の選択（ホットキー）</p>
+                    <div class="flex gap-3 justify-center">
+                        <kbd class="px-4 py-3 bg-gray-900 border-2 border-b-4 border-gray-700 hover:border-purple-500 rounded-xl text-lg font-bold text-purple-400 transition cursor-default">A</kbd>
+                        <kbd class="px-4 py-3 bg-gray-900 border-2 border-b-4 border-gray-700 hover:border-blue-500 rounded-xl text-lg font-bold text-blue-400 transition cursor-default">S</kbd>
+                        <kbd class="px-4 py-3 bg-gray-900 border-2 border-b-4 border-gray-700 hover:border-emerald-500 rounded-xl text-lg font-bold text-emerald-400 transition cursor-default">D</kbd>
+                    </div>
+                    <div class="flex gap-4 justify-center text-xs mt-3 text-gray-400">
+                        <span>🔥 ファイア</span>
+                        <span>🛡️ シールド</span>
+                        <span>💖 ヒール</span>
+                    </div>
+                </div>
+
+                <!-- 詠唱キー -->
+                <div>
+                    <p class="text-xs text-gray-500 mb-3">リズムに合わせて詠唱</p>
+                    <div class="flex justify-center">
+                        <kbd class="px-10 py-3 bg-gray-900 border-2 border-b-4 border-gray-700 hover:border-pink-500 rounded-xl text-lg font-bold text-pink-400 transition cursor-default tracking-wide">SPACE</kbd>
+                    </div>
+                    <p class="text-xs mt-3 text-gray-400">
+                        判定線に重なった瞬間をジャストで狙え！
+                    </p>
+                </div>
+            </div>
+
+            <p class="text-xs md:text-sm text-purple-300 bg-purple-950/20 py-3 px-4 rounded-xl border border-purple-900/30">
+                スマートフォン/タブレット時は、画面下の魔法ボタンを<b>タップ</b>して選択し、ゲーム画面をタイミングよく<b>タッチ</b>するだけでカンタンに遊べます！
+            </p>
+        </div>
+    </section>
+
+    <!-- 最後の導線フッター -->
+    <footer class="bg-black/90 py-16 border-t border-purple-950/60 text-center relative z-10">
+        <div class="max-w-5xl mx-auto px-6">
+            <p class="text-2xl mb-4">🏆</p>
+            <h2 class="text-3xl font-fantasy font-bold tracking-widest text-amber-400 mb-2">
+                BE THE RHYTHM MAGE!
+            </h2>
+            <p class="text-gray-400 text-sm mb-8 max-w-md mx-auto">
+                レッドドラゴンの激しい猛火をしのぎきり、平穏を取り戻しましょう。あなたのリズム感が試されます。
+            </p>
+
+            <a href="https://tsumu07.github.io/HTMLGame/" target="_blank" class="neon-btn inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold text-lg md:text-xl rounded-xl border border-purple-400/30">
+                🚀 ゲームをプレイしに行く！
+            </a>
+
+            <div class="text-xs text-gray-600 mt-12">
+                © 2026 Rhythm Mage Battle. Created with passion for music & games.
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // 背景の魔法粒子アニメーション
+        const canvas = document.getElementById('bgCanvas');
+        const ctx = canvas.getContext('2d');
+
+        let width = canvas.width = window.innerWidth;
+        let height = canvas.height = 650;
+
+        const particles = [];
+        let mouse = { x: null, y: null };
+
+        // リサイズ時の調整
+        window.addEventListener('resize', () => {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = 650;
+        });
+
+        // マウス位置の追従
+        window.addEventListener('mousemove', (e) => {
+            mouse.x = e.clientX;
+            mouse.y = e.clientY + window.scrollY; // スクロール分を補正
+        });
+
+        window.addEventListener('mouseleave', () => {
+            mouse.x = null;
+            mouse.y = null;
+        });
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * width;
+                this.y = Math.random() * height;
+                this.size = Math.random() * 2 + 1;
+                this.speedX = (Math.random() - 0.5) * 0.4;
+                this.speedY = -Math.random() * 0.5 - 0.1;
+                this.color = `hsla(${260 + Math.random() * 60}, 80%, 70%, ${Math.random() * 0.4 + 0.1})`;
+                this.life = Math.random() * 200 + 100;
+            }
+
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+                this.life--;
+
+                // マウス位置への弱い吸い寄せ
+                if (mouse.x !== null && mouse.y !== null) {
+                    const dx = mouse.x - this.x;
+                    const dy = mouse.y - this.y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    if (distance < 150) {
+                        this.x += (dx / distance) * 0.5;
+                        this.y += (dy / distance) * 0.5;
+                    }
+                }
+
+                // 画面外や寿命でリセット
+                if (this.y < 0 || this.life <= 0) {
+                    this.y = height + 10;
+                    this.x = Math.random() * width;
+                    this.life = Math.random() * 200 + 100;
+                }
+            }
+
+            draw() {
+                ctx.fillStyle = this.color;
+                ctx.shadowBlur = 8;
+                ctx.shadowColor = this.color;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        // 初期パーティクルの生成
+        for (let i = 0; i < 60; i++) {
+            particles.push(new Particle());
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, width, height);
+            
+            // 下方向へのフェードグラデーション
+            const bgGrad = ctx.createLinearGradient(0, 0, 0, height);
+            bgGrad.addColorStop(0, 'rgba(3, 0, 10, 0)');
+            bgGrad.addColorStop(1, 'rgba(3, 0, 10, 1)');
+            
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
+
+            ctx.fillStyle = bgGrad;
+            ctx.shadowBlur = 0; // シャドウ効果のリセット
+            ctx.fillRect(0, 0, width, height);
+
+            requestAnimationFrame(animate);
+        }
+
+        // 読み込み完了後にアニメーションを開始
+        window.onload = function() {
+            animate();
+        };
+    </script>
+</body>
+</html>

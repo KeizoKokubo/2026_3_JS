@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<!-- index.html: ゲーム用HTML構造とスクリプト読み込み -->
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ブロック崩しゲーム</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="game-wrapper">
+    <h1 class="game-title">ブロック崩しゲーム</h1>
+    <p class="game-info">
+      画面をクリックしてステージ1を開始！<br />
+      マウスを動かしてパドルを操作し、ボールでブロックを消しましょう。<br />
+      ステージをクリアすると次のステージを選べます。
+    </p>
+    <canvas id="gameCanvas" width="560" height="420"></canvas>
+    <p class="hint">ゲーム中はマウスを動かすとパドルが移動します。ステージ選択画面でもクリックできます。</p>
+  </div>
+
+  <script src="stages.js"></script>
+  <script src="render.js"></script>
+  <script src="game.js"></script>
+</body>
+</html>

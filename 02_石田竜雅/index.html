@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>2DFighters | HTML格闘ゲーム紹介</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <style>
+    :root {
+      --accent: #4f7cff;
+      --bg-dark1: #0a0a0a;
+      --bg-dark2: #1a1a1a;
+      --bg-dark3: #2a2a2a;
+      --card-bg: rgba(20, 20, 20, 0.85);
+      --radius: 20px;
+      --shadow-strong: 0 0 25px rgba(0,0,0,0.7);
+      --shadow-blue: 0 0 25px rgba(79,124,255,0.4);
+    }
+
+    body {
+      margin: 0;
+      font-family: "Inter", "Segoe UI", system-ui;
+      background: linear-gradient(135deg, var(--bg-dark1), var(--bg-dark2) 40%, var(--bg-dark3));
+      color: #eee;
+      line-height: 1.7;
+      overflow-x: hidden;
+    }
+
+    /* ▼ 落ち葉エフェクト Canvas ▼ */
+    #leafCanvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none; /* ← ページ操作を邪魔しない */
+      z-index: 1;           /* ← 背景の上、コンテンツの下 */
+    }
+
+    header, main, footer {
+      position: relative;
+      z-index: 2; /* ← 落ち葉より上に表示 */
+    }
+
+    header {
+      text-align: center;
+      padding: 4rem 1rem 3rem;
+    }
+
+    header h1 {
+      font-size: 3rem;
+      font-weight: 900;
+      letter-spacing: 2px;
+      color: #fff;
+      text-shadow: 0 0 20px var(--accent), 0 0 40px var(--accent);
+    }
+
+    header p {
+      color: #ccc;
+      font-size: 1.2rem;
+    }
+
+    main {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 0 1.5rem 4rem;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      padding: 2rem 2.4rem;
+      margin-bottom: 2rem;
+      box-shadow: var(--shadow-strong), inset 0 0 10px rgba(255,255,255,0.05);
+      border: 2px solid rgba(255,255,255,0.08);
+    }
+
+    .card h2 {
+      font-size: 1.8rem;
+      font-weight: 800;
+      color: var(--accent);
+      text-shadow: 0 0 10px rgba(79,124,255,0.5);
+      border-left: 6px solid var(--accent);
+      padding-left: 0.6rem;
+    }
+
+    /* ▼ スライドショー（900×515固定） ▼ */
+    .slider {
+      position: relative;
+      overflow: hidden;
+      border-radius: 18px;
+      margin: 0 auto 2rem;
+      width: 900px;
+      height: 515px;
+      background: #000;
+      border: 3px solid var(--accent);
+      box-shadow: var(--shadow-blue);
+    }
+
+    .slides {
+      display: flex;
+      width: calc(900px * 3);
+      transition: transform 1s ease;
+    }
+
+    .slide {
+      width: 900px;
+      height: 515px;
+      flex-shrink: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .slide img {
+      width: 900px;
+      height: 515px;
+      object-fit: cover;
+      border-radius: var(--radius);
+    }
+
+    .slider-btn {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(79,124,255,0.7);
+      color: #fff;
+      border: none;
+      padding: 0.6rem 1rem;
+      font-size: 1.6rem;
+      cursor: pointer;
+      border-radius: 10px;
+      transition: 0.2s;
+      user-select: none;
+      z-index: 10;
+      box-shadow: 0 0 15px rgba(79,124,255,0.8);
+    }
+
+    .slider-btn:hover {
+      background: rgba(79,124,255,1);
+      transform: translateY(-50%) scale(1.1);
+    }
+
+    .slider-btn.left {
+      left: 10px;
+    }
+
+    .slider-btn.right {
+      right: 10px;
+    }
+
+.btn-play {
+  display: inline-block;
+  margin-top: 1.8rem;
+  padding: 1.2rem 2.4rem;
+  background: linear-gradient(135deg, #4f7cff, #6fa8ff);
+  color: #fff;
+  text-decoration: none;
+  border-radius: 14px;
+  font-weight: 800;
+  font-size: 1.4rem;
+  letter-spacing: 1px;
+  box-shadow:
+    0 0 20px rgba(79,124,255,0.7),
+    0 0 40px rgba(79,124,255,0.4),
+    inset 0 0 12px rgba(255,255,255,0.2);
+  transition: 0.25s;
+  border: 2px solid rgba(255,255,255,0.15);
+}
+
+.btn-play:hover {
+  transform: scale(1.08);
+  background: linear-gradient(135deg, #6fa8ff, #9bc8ff);
+  box-shadow:
+    0 0 30px rgba(79,124,255,1),
+    0 0 60px rgba(79,124,255,0.7),
+    inset 0 0 18px rgba(255,255,255,0.3);
+}
+
+
+    footer {
+      text-align: center;
+      padding: 2rem;
+      color: #777;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- ▼ 落ち葉エフェクト Canvas ▼ -->
+  <canvas id="leafCanvas"></canvas>
+
+  <header>
+    <h1>2DFighters</h1>
+    <p>HTMLで動作するオリジナル格闘ゲーム。CPUとの1対1のバトルを楽しめます。</p>
+  </header>
+
+  <main>
+
+    <section class="card">
+      <h2>🎮 概要</h2>
+      <p>
+        <strong>2DFighters</strong> は、HTML5 Canvas で動作する2D格闘ゲームです。<br>
+        森の中を舞台に、プレイヤーとCPUが1対1で戦います。<br>
+        シンプル操作で遊べるように設計されており、初心者でもすぐに楽しめます。<br>
+        相手のHPを削り切るか、制限時間内でより多くのダメージを与えた方が勝利となります。
+      </p>
+    </section>
+
+    <!-- ▼ スライドショー ▼ -->
+    <div class="slider">
+      <button class="slider-btn left" id="btnLeft">&#9664;</button>
+      <button class="slider-btn right" id="btnRight">&#9654;</button>
+
+      <div class="slides" id="slides">
+        <div class="slide"><img src="Title.png" alt="タイトル画面"></div>
+        <div class="slide"><img src="Game.png" alt="ゲーム画面"></div>
+        <div class="slide"><img src="Result.png" alt="リザルト画面"></div>
+      </div>
+    </div>
+
+    <section class="card">
+      <h2>🕹️ 操作方法</h2>
+      <ul>
+        <li>A / D：移動</li>
+        <li>Space：ジャンプ</li>
+        <li>P：パンチ</li>
+        <li>K：キック</li>
+        <li>O：ガード（ゲージMAX時）</li>
+        <li>右手の人差し指を[K]、中指を[O]、薬指を[P]に置いて操作するのをおすすめします。</li>
+      </ul>
+    </section>
+
+    <section class="card">
+      <h2>🔥 アピールポイント</h2>
+      <ul>
+        <li>森のステージを完全に Canvas で描画したオリジナル背景</li>
+        <li>パンチ・キック・ガード・カウンターが揃った本格的な格闘システム</li>
+        <li>攻撃ごとのクールダウンやヒットストップで“格闘ゲームらしい重み”を再現</li>
+        <li>CPUは距離を見て接近し、ランダムでジャンプ・ガードを使う簡易AI搭載</li>
+        <li>30秒の制限時間で勝敗が決まるテンポの良いラウンド制</li>
+      </ul>
+    </section>
+
+    <section class="card">
+      <h2>🛠️ 工夫した点</h2>
+      <ul>
+        <li>攻撃判定は矩形同士の当たり判定で正確に処理</li>
+        <li>ガード成功時はカウンターが発動し、敵を大きく吹き飛ばす演出</li>
+        <li>攻撃時の“ヒットストップ”で格闘ゲームらしい爽快感を演出</li>
+        <li>無敵時間・ガードゲージ・ガード成功判定など細かいシステムを実装</li>
+        <li>キャラクターの動きは facing（向き）で左右反転し自然なアニメーションに</li>
+      </ul>
+    </section>
+
+    <section class="card">
+      <h2>💻 使用技術</h2>
+
+      <div style="
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 1.2rem;
+        margin-top: 1.5rem;
+      ">
+        <div style="background: rgba(255,255,255,0.05); border-radius: 14px; padding: 1.2rem; border-left: 6px solid var(--accent);">
+          <h3 style="margin-top:0;">🎨 Canvas描画</h3>
+          <p>森の背景・キャラクター・HPバーなどを Canvas API で描画。</p>
+        </div>
+
+        <div style="background: rgba(255,255,255,0.05); border-radius: 14px; padding: 1.2rem; border-left: 6px solid var(--accent);">
+          <h3 style="margin-top:0;">⚙️ ゲームループ</h3>
+          <p>requestAnimationFrame による滑らかなゲーム進行。</p>
+        </div>
+
+        <div style="background: rgba(255,255,255,0.05); border-radius: 14px; padding: 1.2rem; border-left: 6px solid var(--accent);">
+          <h3 style="margin-top:0;">🥊 当たり判定</h3>
+          <p>矩形判定でパンチ・キック・ガードを正確に処理。</p>
+        </div>
+
+        <div style="background: rgba(255,255,255,0.05); border-radius: 14px; padding: 1.2rem; border-left: 6px solid var(--accent);">
+          <h3 style="margin-top:0;">⌨️ 入力処理</h3>
+          <p>キーボードイベントで操作を制御。</p>
+        </div>
+
+        <div style="background: rgba(255,255,255,0.05); border-radius: 14px; padding: 1.2rem; border-left: 6px solid var(--accent);">
+          <h3 style="margin-top:0;">🌐 GitHub Pages</h3>
+          <p>ブラウザでプレイ可能な形で公開。</p>
+        </div>
+      </div>
+
+    </section>
+
+    <section class="card">
+      <h2>▶️ プレイする</h2>
+      <p>ブラウザ上で今すぐ遊べます。</p>
+      <a class="btn-play" href="https://stonefield72.github.io/2DFighters/" target="_blank">
+  ▶ ゲームをプレイ
+</a>
+
+    </section>
+
+  </main>
+
+  <footer>
+    &copy; 2026 いしだ
+  </footer>
+
+  <!-- ▼ スライドショーの動作スクリプト ▼ -->
+  <script>
+    const slides = document.getElementById("slides");
+    const total = slides.children.length;
+
+    let index = 0;
+
+    function nextSlide() {
+      index = (index + 1) % total;
+      slides.style.transform = `translateX(-${index * 900}px)`;
+    }
+
+    function prevSlide() {
+      index = (index - 1 + total) % total;
+      slides.style.transform = `translateX(-${index * 900}px)`;
+    }
+
+    let autoSlide = setInterval(nextSlide, 3000);
+
+    document.getElementById("btnLeft").addEventListener("click", () => {
+      clearInterval(autoSlide);
+      prevSlide();
+      autoSlide = setInterval(nextSlide, 3000);
+    });
+
+    document.getElementById("btnRight").addEventListener("click", () => {
+      clearInterval(autoSlide);
+      nextSlide();
+      autoSlide = setInterval(nextSlide, 3000);
+    });
+  </script>
+
+  <!-- ▼ リアル緑葉っぱエフェクト ▼ -->
+<!-- ▼ リアル葉脈強化版 ▼ -->
+<!-- ▼ 葉脈の横線を短くしたリアル葉っぱ ▼ -->
+<script>
+  const canvas = document.getElementById("leafCanvas");
+  const ctx = canvas.getContext("2d");
+
+  let W = window.innerWidth;
+  let H = window.innerHeight;
+
+  canvas.width = W;
+  canvas.height = H;
+
+  const leaves = [];
+  const leafCount = 25;
+
+  function random(min, max) {
+    return Math.random() * (max - min) + min;
+  }
+
+  class Leaf {
+    constructor() {
+      this.x = random(0, W);
+      this.y = random(-H, 0);
+      this.size = random(25, 45);
+      this.speed = random(0.4, 1.2);
+      this.angle = random(0, Math.PI * 2);
+      this.spin = random(-0.03, 0.03);
+      this.opacity = random(0.6, 1);
+
+      // 深い緑のリアル葉色
+      const r = random(30, 60);
+      const g = random(120, 200);
+      const b = random(30, 60);
+      this.color = `rgba(${r}, ${g}, ${b}, ${this.opacity})`;
+    }
+
+    update() {
+      this.y += this.speed;
+      this.angle += this.spin;
+      this.x += Math.sin(this.angle) * 1.5;
+
+      if (this.y > H + 50) {
+        this.y = -50;
+        this.x = random(0, W);
+      }
+    }
+
+    draw() {
+      ctx.save();
+      ctx.translate(this.x, this.y);
+      ctx.rotate(this.angle);
+
+      /* ▼ 葉っぱの輪郭（リアルな形） */
+      ctx.fillStyle = this.color;
+      ctx.beginPath();
+      ctx.moveTo(0, -this.size);
+      ctx.quadraticCurveTo(this.size, 0, 0, this.size);
+      ctx.quadraticCurveTo(-this.size, 0, 0, -this.size);
+      ctx.fill();
+
+      /* ▼ 主脈（中央の太い葉脈） */
+      ctx.strokeStyle = "rgba(255,255,255,0.35)";
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      ctx.moveTo(0, -this.size);
+      ctx.lineTo(0, this.size);
+      ctx.stroke();
+
+      /* ▼ 側脈（横線を半分の長さに短縮） */
+      ctx.strokeStyle = "rgba(255,255,255,0.25)";
+      ctx.lineWidth = 1.5;
+
+      for (let i = -this.size * 0.6; i < this.size * 0.6; i += this.size * 0.25) {
+        ctx.beginPath();
+        ctx.moveTo(0, i);
+        ctx.lineTo(this.size * 0.25, i + this.size * 0.15); // ← ここを短くした！
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(0, i);
+        ctx.lineTo(-this.size * 0.25, i + this.size * 0.15); // ← 左側も短く
+        ctx.stroke();
+      }
+
+      ctx.restore();
+    }
+  }
+
+  for (let i = 0; i < leafCount; i++) {
+    leaves.push(new Leaf());
+  }
+
+  function animate() {
+    ctx.clearRect(0, 0, W, H);
+
+    leaves.forEach(leaf => {
+      leaf.update();
+      leaf.draw();
+    });
+
+    requestAnimationFrame(animate);
+  }
+
+  animate();
+
+  window.addEventListener("resize", () => {
+    W = window.innerWidth;
+    H = window.innerHeight;
+    canvas.width = W;
+    canvas.height = H;
+  });
+</script>
+
+
+</body>
+</html>

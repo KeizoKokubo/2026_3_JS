@@ -1,0 +1,751 @@
+/* ==========================================================================
+   MAZE SHIFT - ゲームホームページ用 スタイルシート (style.css)
+   ========================================================================== */
+
+/* 
+   【カスタマイズガイド】
+   以下の「:root」の中にある値を書き換えるだけで、ホームページ全体の
+   「色」「フォント」「角丸」「光るエフェクトの強さ」を一括で変更できます！
+   好きな色（カラーコードやRGB）に変えて、自分だけのデザインにしてみてください。
+*/
+:root {
+  /* --- テーマカラー設定 --- */
+  --bg-color-main: #0a0c10;       /* ページ全体の背景色（深みのある黒） */
+  --bg-color-card: rgba(20, 24, 33, 0.6); /* カードなどの背景（すりガラス効果用の半透明） */
+  --text-color-main: #f0f4f8;     /* メインの文字色（少し青みがかった白） */
+  --text-color-sub: #8a99ad;      /* 補足の文字色（グレー） */
+
+  /* --- ネオンカラー（アクセント色） --- */
+  --color-primary: #00f0ff;       /* メインアクセント：ネオンブルー（近未来感） */
+  --color-secondary: #bd00ff;     /* サブアクセント：ネオンパープル（サイバー感） */
+  --color-accent: #ff0055;        /* 警告・目立たせたい部分：ネオンピンク/レッド */
+
+  /* --- キャラクター固有カラー（計画書の3キャラ用） --- */
+  --color-crusher: #ff3344;       /* クラッシャー（赤） */
+  --color-ghost: #b333ff;         /* ゴースト（紫） */
+  --color-defender: #3388ff;      /* ディフェンダー（青） */
+
+  /* --- デザインの調整値 --- */
+  --font-family: 'Outfit', 'Noto Sans JP', sans-serif; /* 使用するフォント */
+  --border-radius: 12px;          /* 角丸の大きさ（数字を大きくすると丸くなります） */
+  --transition-speed: 0.3s;       /* アニメーションの速度（ホバー時などの変化時間） */
+  --container-width: 1200px;      /* コンテンツの最大横幅 */
+}
+
+/* ==========================================================================
+   1. 基本設定 & リセット
+   ========================================================================== */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth; /* リンクをクリックしたときに滑らかにスクロールする設定 */
+}
+
+body {
+  background-color: var(--bg-color-main);
+  color: var(--text-color-main);
+  font-family: var(--font-family);
+  line-height: 1.6;
+  overflow-x: hidden;
+  /* 背景にうっすらとサイバー風のグリッド（格子模様）を描画 */
+  background-image: 
+    linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+  transition: all var(--transition-speed) ease;
+}
+
+/* ==========================================================================
+   2. 共通パーツ・ユーティリティ（ボタン、レイアウトなど）
+   ========================================================================== */
+.container {
+  max-width: var(--container-width);
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+/* --- セクション共通タイトル --- */
+.section-title {
+  font-size: 2.5rem;
+  text-align: center;
+  margin-bottom: 60px;
+  position: relative;
+  font-weight: 800;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  background: linear-gradient(45deg, var(--color-primary), var(--color-secondary));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.section-title::after {
+  content: '';
+  position: absolute;
+  bottom: -15px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80px;
+  height: 4px;
+  background: linear-gradient(90deg, var(--color-primary), var(--color-secondary));
+  border-radius: 2px;
+  box-shadow: 0 0 10px var(--color-primary);
+}
+
+/* --- ネオン風ボタン（ゲーム開始など） --- */
+.btn-neon {
+  display: inline-block;
+  padding: 14px 36px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #fff;
+  background: transparent;
+  border: 2px solid var(--color-primary);
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 0 15px rgba(0, 240, 255, 0.2);
+  text-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
+}
+
+.btn-neon::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(0, 240, 255, 0.4), transparent);
+  transition: all 0.5s ease;
+}
+
+.btn-neon:hover {
+  background-color: var(--color-primary);
+  color: var(--bg-color-main);
+  box-shadow: 0 0 30px var(--color-primary);
+  text-shadow: none;
+}
+
+.btn-neon:hover::before {
+  left: 100%;
+}
+
+/* --- サブボタン --- */
+.btn-sub {
+  display: inline-block;
+  padding: 14px 36px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-color-main);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--border-radius);
+  cursor: pointer;
+}
+
+.btn-sub:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+/* --- ガラスモルフィズムカード（基本ボックス） --- */
+.glass-panel {
+  background: var(--bg-color-card);
+  backdrop-filter: blur(10px); /* すりガラス効果 */
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--border-radius);
+  padding: 30px;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  transition: transform var(--transition-speed) ease, border-color var(--transition-speed) ease;
+}
+
+.glass-panel:hover {
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+/* ==========================================================================
+   3. 【重要】画像プレースホルダー（画像が入っていない場合のダミーデザイン）
+   ========================================================================== */
+/* 
+   画像タグ <img> にこのクラスを指定するか、枠となるコンテナに指定することで、
+   画像パスが空や未設定の場合でも綺麗に見せることができます。
+   画像を設定すると、自動的にその画像が全画面表示されます。
+*/
+.image-box {
+  width: 100%;
+  height: 100%;
+  min-height: 200px;
+  border-radius: calc(var(--border-radius) - 4px);
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, rgba(20, 24, 33, 0.9), rgba(10, 12, 16, 0.9));
+  border: 2px dashed rgba(255, 255, 255, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-speed) ease;
+}
+
+/* 画像が配置されたときのスタイル */
+.image-box img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* アスペクト比を保ったまま枠いっぱいに表示 */
+  z-index: 1;
+}
+
+/* 画像が無いとき用の仮の文字やアイコン（画像が入るとz-indexで隠れます） */
+.image-box::before {
+  content: 'NO IMAGE\n(ここに画像を配置できます)';
+  white-space: pre-wrap;
+  text-align: center;
+  font-size: 0.9rem;
+  color: var(--text-color-sub);
+  font-weight: 500;
+  z-index: 0;
+}
+
+/* ホバー時に光る演出 */
+.image-box:hover {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 15px rgba(0, 240, 255, 0.2);
+}
+
+
+/* ==========================================================================
+   4. ヘッダー（ナビゲーションバー）
+   ========================================================================== */
+header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 100;
+  background: rgba(10, 12, 16, 0.8);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+header .container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 80px;
+}
+
+/* ロゴ / タイトル */
+.logo {
+  font-size: 1.8rem;
+  font-weight: 900;
+  letter-spacing: 2px;
+  background: linear-gradient(45deg, #fff, var(--color-primary));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 0 10px rgba(0, 240, 255, 0.2);
+}
+
+/* メニュー */
+nav ul {
+  display: flex;
+  list-style: none;
+  gap: 30px;
+}
+
+nav a {
+  font-weight: 600;
+  font-size: 1rem;
+  color: var(--text-color-sub);
+}
+
+nav a:hover,
+nav a.active {
+  color: var(--color-primary);
+  text-shadow: 0 0 8px rgba(0, 240, 255, 0.5);
+}
+
+
+/* ==========================================================================
+   5. ヒーローセクション（メインビジュアル）
+   ========================================================================== */
+#hero {
+  padding-top: 180px;
+  padding-bottom: 100px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* 背景を彩る光の玉（オーブ） */
+#hero::before {
+  content: '';
+  position: absolute;
+  top: 10%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 600px;
+  height: 300px;
+  background: radial-gradient(circle, rgba(0, 240, 255, 0.15) 0%, transparent 70%);
+  z-index: -1;
+  pointer-events: none;
+}
+
+.hero-wrapper {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 50px;
+  align-items: center;
+}
+
+.hero-content h1 {
+  font-size: 4rem;
+  font-weight: 900;
+  line-height: 1.1;
+  margin-bottom: 20px;
+  letter-spacing: -1px;
+}
+
+.hero-content h1 span {
+  display: block;
+  background: linear-gradient(90deg, var(--color-primary), var(--color-secondary));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 0 15px rgba(0, 240, 255, 0.3));
+}
+
+.hero-content p {
+  font-size: 1.2rem;
+  color: var(--text-color-sub);
+  margin-bottom: 40px;
+}
+
+.hero-buttons {
+  display: flex;
+  gap: 20px;
+}
+
+/* メインビジュアル用の大きな画像エリア */
+.hero-visual {
+  width: 100%;
+  height: 400px;
+  perspective: 1000px;
+}
+
+.hero-visual .image-box {
+  transform: rotateY(-10deg) rotateX(5deg);
+  box-shadow: -20px 20px 50px rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(0, 240, 255, 0.3);
+}
+
+.hero-visual .image-box::before {
+  content: 'GAME SCREENPLAY IMAGE\n(ここにゲームプレイ時のメイン画像を配置)';
+  font-size: 1rem;
+}
+
+
+/* ==========================================================================
+   6. ABOUT セクション（ゲームの特徴）
+   ========================================================================== */
+#about {
+  padding: 100px 0;
+  position: relative;
+}
+
+.about-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 30px;
+}
+
+.about-card {
+  text-align: center;
+  position: relative;
+}
+
+/* 特徴カードのアイコン枠 */
+.about-icon {
+  width: 70px;
+  height: 70px;
+  margin: 0 auto 25px;
+  background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.8rem;
+  box-shadow: 0 0 20px rgba(0, 240, 255, 0.4);
+}
+
+.about-card h3 {
+  font-size: 1.4rem;
+  margin-bottom: 15px;
+  color: #fff;
+}
+
+.about-card p {
+  font-size: 0.95rem;
+  color: var(--text-color-sub);
+}
+
+
+/* ==========================================================================
+   7. CHARACTERS セクション（キャラクター紹介）
+   ========================================================================== */
+#characters {
+  padding: 100px 0;
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.characters-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 30px;
+}
+
+.character-card {
+  overflow: hidden;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+/* キャラクター画像枠 */
+.char-img-area {
+  width: 100%;
+  height: 260px;
+}
+
+.char-img-area .image-box {
+  border: none;
+  border-radius: calc(var(--border-radius) - 1px) calc(var(--border-radius) - 1px) 0 0;
+}
+
+/* キャラクター詳細情報 */
+.char-info {
+  padding: 25px;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.char-name {
+  font-size: 1.6rem;
+  font-weight: 800;
+  margin-bottom: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.char-class {
+  font-size: 0.85rem;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-weight: 700;
+}
+
+.char-desc {
+  font-size: 0.9rem;
+  color: var(--text-color-sub);
+  margin-bottom: 20px;
+}
+
+/* キャラ別特殊能力のブロック */
+.char-abilities {
+  margin-top: auto;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  padding-top: 15px;
+}
+
+.ability-row {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin-bottom: 8px;
+  font-size: 0.85rem;
+}
+
+.ability-label {
+  font-weight: 700;
+  flex-shrink: 0;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.ability-text {
+  color: var(--text-color-main);
+}
+
+/* キャラクターごとのテーマカラー適用 */
+/* 1. クラッシャー（赤） */
+.char-crusher .char-name { color: var(--color-crusher); }
+.char-crusher .char-class { background: rgba(255, 51, 68, 0.15); border: 1px solid var(--color-crusher); color: var(--color-crusher); }
+.char-crusher .image-box { background: linear-gradient(135deg, rgba(255, 51, 68, 0.2), #0a0c10); }
+.char-crusher .image-box::before { content: 'CRUSHER IMAGE\n(ここにクラッシャーの画像)'; color: var(--color-crusher); }
+
+/* 2. ゴースト（紫） */
+.char-ghost .char-name { color: var(--color-ghost); }
+.char-ghost .char-class { background: rgba(179, 51, 255, 0.15); border: 1px solid var(--color-ghost); color: var(--color-ghost); }
+.char-ghost .image-box { background: linear-gradient(135deg, rgba(179, 51, 255, 0.2), #0a0c10); }
+.char-ghost .image-box::before { content: 'GHOST IMAGE\n(ここにゴーストの画像)'; color: var(--color-ghost); }
+
+/* 3. ディフェンダー（青） */
+.char-defender .char-name { color: var(--color-defender); }
+.char-defender .char-class { background: rgba(51, 136, 255, 0.15); border: 1px solid var(--color-defender); color: var(--color-defender); }
+.char-defender .image-box { background: linear-gradient(135deg, rgba(51, 136, 255, 0.2), #0a0c10); }
+.char-defender .image-box::before { content: 'DEFENDER IMAGE\n(ここにディフェンダーの画像)'; color: var(--color-defender); }
+
+
+/* ==========================================================================
+   8. SYSTEM / RULES セクション（ゲームシステムとルール）
+   ========================================================================= */
+#rules {
+  padding: 100px 0;
+}
+
+.rules-wrapper {
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  gap: 50px;
+  align-items: center;
+}
+
+.rules-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.rule-item {
+  display: flex;
+  gap: 20px;
+}
+
+.rule-num {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(0, 240, 255, 0.1);
+  border: 1px solid var(--color-primary);
+  color: var(--color-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 1.2rem;
+  flex-shrink: 0;
+  box-shadow: 0 0 10px rgba(0, 240, 255, 0.2);
+}
+
+.rule-text h4 {
+  font-size: 1.2rem;
+  margin-bottom: 5px;
+  color: #fff;
+}
+
+.rule-text p {
+  font-size: 0.95rem;
+  color: var(--text-color-sub);
+}
+
+/* ルール用のビジュアル枠（迷路などの仮画像） */
+.rules-visual {
+  width: 100%;
+  height: 350px;
+}
+
+.rules-visual .image-box {
+  border: 1px solid rgba(189, 0, 255, 0.3);
+  box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+}
+
+.rules-visual .image-box::before {
+  content: 'MAZE RULES IMAGE\n(ここに迷路作成/脱出のルール画像を配置)';
+  color: var(--color-secondary);
+}
+
+
+/* ==========================================================================
+   9. GALLERY セクション（スクリーンショット一覧）
+   ========================================================================== */
+#gallery {
+  padding: 100px 0;
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+.gallery-item {
+  height: 220px;
+  overflow: hidden;
+  border-radius: var(--border-radius);
+  position: relative;
+  cursor: pointer;
+}
+
+.gallery-item .image-box {
+  border: 1px solid rgba(255,255,255,0.05);
+}
+
+.gallery-item .image-box::before {
+  content: 'SCREENSHOT\n(スクリーンショット画像を配置)';
+}
+
+/* ホバー時に画像を少し拡大するエフェクト */
+.gallery-item img {
+  transition: transform var(--transition-speed) ease;
+}
+
+.gallery-item:hover img {
+  transform: scale(1.05);
+}
+
+
+/* ==========================================================================
+   10. フッター
+   ========================================================================== */
+footer {
+  background: #050608;
+  padding: 60px 0 30px;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  color: var(--text-color-sub);
+}
+
+.footer-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 40px;
+}
+
+.footer-logo {
+  font-size: 1.5rem;
+  font-weight: 900;
+  color: #fff;
+}
+
+.footer-logo span {
+  color: var(--color-primary);
+}
+
+/* SNS等の外部リンク */
+.social-links {
+  display: flex;
+  gap: 20px;
+}
+
+.social-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-color-main);
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.social-btn:hover {
+  background: var(--color-primary);
+  color: var(--bg-color-main);
+  border-color: var(--color-primary);
+  box-shadow: 0 0 15px var(--color-primary);
+  transform: translateY(-3px);
+}
+
+.copyright {
+  text-align: center;
+  font-size: 0.85rem;
+  padding-top: 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+
+/* ==========================================================================
+   11. レスポンシブ対応 (スマートフォン・タブレット向け調整)
+   ========================================================================== */
+@media (max-width: 992px) {
+  .hero-wrapper {
+    grid-template-columns: 1fr;
+    gap: 40px;
+    text-align: center;
+  }
+  
+  .hero-buttons {
+    justify-content: center;
+  }
+  
+  .hero-visual {
+    height: 300px;
+  }
+  
+  .hero-visual .image-box {
+    transform: none; /* 傾きを戻す */
+  }
+  
+  .about-grid,
+  .characters-grid,
+  .gallery-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .rules-wrapper {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .section-title {
+    font-size: 2rem;
+  }
+  
+  .hero-content h1 {
+    font-size: 3rem;
+  }
+  
+  .about-grid,
+  .characters-grid,
+  .gallery-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  header .container {
+    flex-direction: column;
+    height: auto;
+    padding: 15px 20px;
+    gap: 15px;
+  }
+  
+  nav ul {
+    gap: 15px;
+  }
+  
+  .footer-content {
+    flex-direction: column;
+    gap: 20px;
+    text-align: center;
+  }
+}

@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LINK START // MY WORKS</title>
+    <style>
+        /* --- SAO風ベーススタイル --- */
+        body {
+            background-color: #0b0f12;
+            color: #e0e6ed;
+            font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', sans-serif;
+            margin: 0;
+            padding: 40px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            border-bottom: 2px solid #00d2ff;
+            padding-bottom: 10px;
+            width: 100%;
+            max-width: 800px;
+        }
+
+        header h1 {
+            font-size: 24px;
+            letter-spacing: 4px;
+            color: #00d2ff;
+            text-shadow: 0 0 10px rgba(0, 210, 255, 0.5);
+            margin: 0;
+        }
+
+        header .subtitle {
+            font-size: 11px;
+            color: #687d93;
+            letter-spacing: 2px;
+            margin-top: 5px;
+        }
+
+        /* --- メインコンテナ --- */
+        main {
+            width: 100%;
+            max-width: 800px;
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+
+        /* --- 作品カード（UIウィンドウ風） --- */
+        .card {
+            background: rgba(16, 24, 32, 0.85);
+            border-left: 4px solid #ff7b00;
+            border-top: 1px solid rgba(0, 210, 255, 0.2);
+            border-right: 1px solid rgba(0, 210, 255, 0.2);
+            border-bottom: 1px solid rgba(0, 210, 255, 0.2);
+            padding: 25px;
+            position: relative;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            border-left-color: #00d2ff;
+            box-shadow: 0 0 15px rgba(0, 210, 255, 0.2);
+            transform: translateX(5px);
+        }
+
+        .card h2 {
+            font-size: 20px;
+            margin: 0 0 15px 0;
+            color: #ffffff;
+        }
+
+        .info-section {
+            margin-bottom: 20px;
+        }
+
+        .info-section h3 {
+            font-size: 12px;
+            color: #00d2ff;
+            letter-spacing: 1px;
+            margin: 15px 0 5px 0;
+            text-transform: uppercase;
+        }
+
+        .info-section p {
+            font-size: 14px;
+            line-height: 1.6;
+            color: #b0c2d4;
+            margin: 0;
+            white-space: pre-wrap;
+        }
+
+        .tags {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+
+        .tag {
+            background: rgba(0, 210, 255, 0.1);
+            border: 1px solid rgba(0, 210, 255, 0.3);
+            color: #00d2ff;
+            font-size: 11px;
+            padding: 2px 8px;
+            border-radius: 3px;
+        }
+
+        .btn-link {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: transparent;
+            color: #ff7b00;
+            border: 1px solid #ff7b00;
+            padding: 10px 20px;
+            font-size: 13px;
+            font-weight: bold;
+            text-decoration: none;
+            letter-spacing: 1px;
+            transition: all 0.2s ease;
+            margin-top: 15px;
+            cursor: pointer;
+        }
+
+        .btn-link:hover {
+            background: #ff7b00;
+            color: #0b0f12;
+            box-shadow: 0 0 10px rgba(255, 123, 0, 0.5);
+        }
+
+        footer {
+            margin-top: 60px;
+            font-size: 11px;
+            color: #4a5969;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>LOG OUT // NOT AVAILABLE</h1>
+        <div class="subtitle">MY CREATIONS & ARTIFACTS</div>
+    </header>
+
+    <main>
+
+        <section class="card">
+            <h2>Weapon Battle</h2>
+            
+            <div class="info-section">
+                <h3>■ 概要</h3>
+                <p>ここに作品の簡単な概要を書き込みます。</p>
+                
+                <h3>■ 工夫点・こだわった箇所</h3>
+                <p>・ここに工夫したポイントを自由に書き込みます。
+・デザインをSAO風のダークかつサイバーな雰囲気に統一しました。
+・HTMLとCSSだけで、軽快に動くUIウィンドウを再現しました。
+・ここをいつでもメモ帳などで開いて、追記したり編集したりできます。</p>
+
+                <h3>■ 使用言語 / ツール</h3>
+                <div class="tags">
+                    <span class="tag">HTML</span>
+                    <span class="tag">CSS</span>
+                    <span class="tag">JavaScript</span>
+                </div>
+            </div>
+
+            
+            <a href=" https://nto710.github.io/WeaponBattle/" target="_blank" class="btn-link">
+                Playing Game
+            </a>
+        </section>
+        </main>
+
+    <footer>
+        <p>&copy; 2026 SAO Style Portfolio. All Rights Reserved.</p>
+    </footer>
+
+</body>
+</html>

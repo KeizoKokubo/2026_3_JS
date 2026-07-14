@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>METALSONIC - ゲーム紹介</title>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+    font-family:"Yu Gothic","Segoe UI",sans-serif;
+    background:#050816;
+    color:white;
+    line-height:1.8;
+    position:relative;
+    overflow-x:hidden;
+}
+
+header{
+    text-align:center;
+    padding:80px 20px;
+    background:linear-gradient(135deg,#00c6ff,#7b2ff7);
+}
+
+header h1{
+    font-size:4rem;
+    letter-spacing:5px;
+}
+
+header p{
+    margin-top:15px;
+    font-size:1.2rem;
+}
+
+section{
+    max-width:1000px;
+    margin:auto;
+    padding:60px 20px;
+}
+
+h2{
+    color:#38bdf8;
+    margin-bottom:20px;
+    border-left:6px solid #38bdf8;
+    padding-left:12px;
+}
+
+.card{
+    background:#0f172a;
+    padding:25px;
+    border-radius:15px;
+    margin-bottom:25px;
+    box-shadow:0 0 15px rgba(0,255,255,0.15);
+}
+
+.grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+    gap:20px;
+}
+
+.feature{
+    background:#111827;
+    padding:20px;
+    border-radius:12px;
+    border:1px solid rgba(255,255,255,0.1);
+}
+
+.feature h3{
+    color:#f97316;
+    margin-bottom:10px;
+}
+
+.tech-list{
+    display:flex;
+    flex-wrap:wrap;
+    gap:12px;
+}
+
+.tech{
+    background:#38bdf8;
+    color:black;
+    padding:10px 15px;
+    border-radius:999px;
+    font-weight:bold;
+}
+
+footer{
+    text-align:center;
+    padding:40px;
+    background:#020617;
+    color:#94a3b8;
+}
+
+.highlight{
+    color:#f43f5e;
+    font-weight:bold;
+}
+
+.screenshot-area{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+    gap:25px;
+}
+
+.screen-card{
+    background:#0f172a;
+    border-radius:15px;
+    overflow:hidden;
+    box-shadow:0 0 15px rgba(0,255,255,0.15);
+}
+
+.screen-card img{
+    width:100%;
+    height:220px;
+    object-fit:cover;
+    display:block;
+}
+
+.screen-card h3{
+    padding:15px 15px 0;
+    color:#38bdf8;
+}
+
+.screen-card p{
+    padding:10px 15px 20px;
+}
+.play-button{
+    display:inline-block;
+    margin-top:20px;
+    padding:15px 35px;
+    background:linear-gradient(135deg,#38bdf8,#7b2ff7);
+    color:white;
+    text-decoration:none;
+    border-radius:999px;
+    font-size:1.2rem;
+    font-weight:bold;
+    transition:0.3s;
+}
+
+.play-button:hover{
+    transform:translateY(-3px);
+    box-shadow:0 0 20px rgba(56,189,248,0.7);
+}
+
+/* 星空背景 */
+.stars{
+    position:fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    z-index:-1;
+    overflow:hidden;
+}
+
+.stars span{
+    position:absolute;
+    background:white;
+    border-radius:50%;
+
+    box-shadow:
+        0 0 5px white,
+        0 0 10px #38bdf8,
+        0 0 20px #38bdf8;
+
+    animation:starMove linear infinite;
+}
+
+@keyframes starMove{
+    from{
+        transform:translateY(-100vh);
+    }
+    to{
+        transform:translateY(100vh);
+    }
+}
+</style>
+</head>
+
+<body>
+
+
+<div class="stars">
+    
+</div>
+
+<header>
+    <h1>METALSONIC</h1>
+    <p>アーケードスタイル縦スクロールシューティングゲーム</p>
+</header>
+
+<section>
+    <h2>ゲーム概要</h2>
+
+    <div class="card">
+        <p>
+            「METALSONIC」は、縦スクロールシューティングゲーム
+            「SONIC WINGS」を参考に制作した縦スクロールシューティングゲームです。
+            プレイヤーは戦闘機を操作しながら敵を撃破し、
+            パワーアップアイテムで機体を強化して最終ボスの撃破を目指します。
+        </p>
+    </div>
+</section>
+
+<section>
+    <h2>コンセプト</h2>
+
+    <div class="card">
+        <p>
+            <span class="highlight">
+            「誰でも遊べる本格縦スクロールシューティング」
+            </span>
+        </p>
+
+        <p>
+            操作はシンプルにしながらも、敵の種類や弾幕、
+            ボス戦の緊張感を取り入れ、
+            初心者も楽しめるゲームを目指しました。
+        </p>
+    </div>
+</section>
+
+<section>
+    <h2>ゲームの見どころ</h2>
+
+    <div class="grid">
+
+        <div class="feature">
+            <h3>ステージ構成</h3>
+            <p>
+                スコアに応じてゲームが進行し、
+                ステージごとに敵の種類や難易度が変化します。
+            </p>
+        </div>
+
+        <div class="feature">
+            <h3>多彩な敵</h3>
+            <p>
+                通常敵、射撃敵、ジグザグ敵、
+                高耐久敵など複数の敵を実装しています。
+            </p>
+        </div>
+
+        <div class="feature">
+            <h3>パワーアップ</h3>
+            <p>
+                アイテムを取得することでHP回復や
+                ショット強化が可能です。
+            </p>
+        </div>
+
+        <div class="feature">
+            <h3>ボス戦</h3>
+            <p>
+                最終ステージでは複数の攻撃パターンを持つ
+                強力なボスと戦います。
+            </p>
+        </div>
+
+    </div>
+</section>
+
+<section>
+    <h2>ゲーム画面</h2>
+
+    <div class="screenshot-area">
+
+        <div class="screen-card">
+            <img src="screenshot1.png" alt="タイトル画面">
+
+            <h3>タイトル画面</h3>
+            <p>
+                ゲーム開始前のタイトル画面。
+                シンプルな操作で誰でもすぐに遊べます。
+            </p>
+        </div>
+
+        <div class="screen-card">
+            <img src="screenshot2.png" alt="通常ステージ">
+
+            <h3>通常ステージ</h3>
+            <p>
+                敵を撃破しながら進むメインステージ。
+                ステージが進むにつれて難易度も上昇します。
+            </p>
+        </div>
+
+        <div class="screen-card">
+           <img src="screenshot3.png" alt="ボス戦">
+            <h3>ボス戦</h3>
+            <p>
+                最終ボスとの戦闘。
+                多彩な攻撃パターンを回避しながら撃破を目指します。
+            </p>
+        </div>
+
+    </div>
+</section>
+<section>
+    <h2>ゲームをプレイ</h2>
+
+    <div class="card" style="text-align:center;">
+
+        <p>
+            実際にMETALSONICをプレイできます。<br>
+            パワーアップを集めながら敵を撃破し、
+            最終ボスの討伐を目指してください。
+        </p>
+
+        <a href="https://otama345.github.io/METALSONIC/"
+           class="play-button"
+           target="_blank">
+           🎮 PLAY GAME
+        </a>
+
+    </div>
+</section>
+</section>
+<section>
+    <h2>工夫した点</h2>
+
+    <div class="card">
+        <ul>
+            <li>敵ごとに異なる移動パターンと攻撃方法を実装した。</li>
+            <li>ステージ進行に合わせて難易度が自然に上昇するよう調整した。</li>
+            <li>パワーアップによってプレイヤーが成長を実感できる設計にした。</li>
+            <li>ボス専用の攻撃パターンを複数用意した。</li>
+            <li>画面揺れ・爆発エフェクト・フラッシュ演出を追加して迫力を向上させた。</li>
+        </ul>
+    </div>
+</section>
+
+<section>
+    <h2>遊び方</h2>
+
+    <div class="card">
+        <p><strong>移動</strong>：WASDキー または 矢印キー</p>
+        <p><strong>ショット</strong>：Spaceキー または Zキー</p>
+        <p><strong>開始</strong>：Enterキー</p>
+        <br>
+        <p>
+            敵を撃破してスコアを獲得しながら進み、
+            パワーアップアイテムで機体を強化して
+            ボス撃破を目指します。
+        </p>
+    </div>
+</section>
+
+<section>
+    <h2>使用技術</h2>
+
+    <div class="tech-list">
+        <div class="tech">HTML5</div>
+        <div class="tech">CSS3</div>
+        <div class="tech">JavaScript</div>
+        <div class="tech">Canvas API</div>
+    </div>
+</section>
+
+<section>
+    <h2>アピールポイント</h2>
+
+    <div class="card">
+        <p>
+            この作品では単純なシューティングゲームではなく、
+            <strong>
+            「ステージ進行」「敵AI」「パワーアップ」「ボス戦」「演出表現」
+            </strong>
+            を組み合わせることで、本格的なアーケードゲームに近い体験を目指しました。
+        </p>
+
+        <p>
+            特にボス戦の攻撃パターンや背景演出の変化に力を入れ、
+            プレイヤーが最後まで楽しめる作品となるよう工夫しました。
+        </p>
+    </div>
+</section>
+
+<footer>
+    <p>METALSONIC - School Project Presentation</p>
+</footer>
+<script>
+const stars = document.querySelector(".stars");
+
+for(let i=0;i<100;i++){
+
+    const star = document.createElement("span");
+
+    star.style.left = Math.random()*100 + "%";
+    star.style.top = Math.random()*100 + "%";
+
+    const size = Math.random()*3 + 1;
+
+    star.style.width = size + "px";
+    star.style.height = size + "px";
+
+    star.style.animationDuration =
+        (Math.random()*8 + 5) + "s";
+
+    stars.appendChild(star);
+}
+</script>
+</body>
+</html>

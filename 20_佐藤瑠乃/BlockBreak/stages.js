@@ -1,0 +1,40 @@
+// stages.js: ステージ定義データ
+const stageDefinitions = [
+  {
+    id: 0,
+    title: "チュートリアル",
+    description: "操作方法を学ぼう",
+    pattern: ["11111111", "00000000", "00000000", "00000000"],
+    paddleWidth: 120,
+    ballSpeed: 3,
+    color: "#00ffff",
+    isTutorial: true,
+  },
+  {
+    id: 1,
+    title: "ステージ1",
+    description: "基本の配置",
+    pattern: ["11111111", "10101010", "11111111", "01010101"],
+    paddleWidth: 100,
+    ballSpeed: 4,
+    color: "#ff00ff",
+  },
+  {
+    id: 2,
+    title: "ステージ2",
+    description: "少しだけ難しく",
+    pattern: ["00011100", "01111110", "11111111", "01111110", "00111100"],
+    paddleWidth: 84,
+    ballSpeed: 5,
+    color: "#00ff00",
+  },
+  {
+    id: 3,
+    title: "ステージ3",
+    description: "最後の挑戦",
+    pattern: ["11111111", "11111111", "01111110", "00111100", "00011000"],
+    paddleWidth: 74,
+    ballSpeed: 5.5,
+    color: "#ffff00",
+  },
+];

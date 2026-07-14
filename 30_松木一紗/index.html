@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>リズム★オーケストラ ‐ 3D Rhythm Stage Game</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Mochiy+Pop+One&family=Kosugi+Maru&display=swap');
+
+:root{
+  --ink:#16121F;
+  --ink2:#1E1930;
+  --cream:#FFF6E9;
+  --pink:#FF3E7F;
+  --yellow:#FFD23F;
+  --cyan:#3EC6FF;
+  --green:#4CD787;
+}
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{margin:0;background:var(--ink);color:var(--cream);
+  font-family:'Kosugi Maru','Hiragino Maru Gothic ProN',sans-serif;
+  overflow-x:hidden;}
+a{color:inherit;}
+
+.wrap{max-width:960px;margin:0 auto;padding:0 24px;}
+
+/* ---------------- HERO ---------------- */
+.hero{position:relative;min-height:100vh;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;text-align:center;overflow:hidden;
+  background:radial-gradient(circle at 50% 38%, #2A2140 0%, var(--ink) 68%);}
+
+.ringStage{position:relative;width:280px;height:280px;display:flex;align-items:center;justify-content:center;
+  margin-bottom:8px;}
+.pulseRing{position:absolute;border-radius:50%;border:3px solid var(--yellow);opacity:0;
+  animation:pulseOut 2.4s cubic-bezier(.2,.7,.3,1) infinite;}
+.pulseRing.r2{border-color:var(--pink);animation-delay:.6s;}
+.pulseRing.r3{border-color:var(--cyan);animation-delay:1.2s;}
+.pulseRing.r4{border-color:var(--green);animation-delay:1.8s;}
+@keyframes pulseOut{
+  0%{width:40px;height:40px;opacity:.9;}
+  100%{width:280px;height:280px;opacity:0;}
+}
+.coreDot{width:64px;height:64px;border-radius:50%;background:var(--cream);
+  box-shadow:0 0 40px rgba(255,246,233,.5);position:relative;z-index:2;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Mochiy Pop One',sans-serif;font-size:11px;color:var(--ink);letter-spacing:1px;}
+
+.eyebrow{font-family:'Mochiy Pop One',sans-serif;font-size:13px;letter-spacing:5px;color:var(--cyan);
+  margin:6px 0 14px 0;}
+h1.title{font-family:'Mochiy Pop One',sans-serif;font-size:clamp(38px,8vw,68px);margin:0;
+  color:var(--cream);text-shadow:0 5px 0 var(--pink);letter-spacing:2px;}
+p.tagline{max-width:520px;font-size:16px;line-height:1.9;color:rgba(255,246,233,.82);
+  margin:22px 0 34px 0;}
+
+.playBtn{font-family:'Mochiy Pop One',sans-serif;font-size:18px;letter-spacing:3px;color:var(--ink);
+  background:var(--yellow);border:none;padding:18px 54px;border-radius:44px;cursor:pointer;
+  text-decoration:none;display:inline-block;
+  box-shadow:0 7px 0 #B88E1F, 0 10px 26px rgba(0,0,0,.4);
+  transition:transform .15s ease;}
+.playBtn:hover{transform:translateY(-3px);}
+.playBtn:active{transform:translateY(4px);box-shadow:0 3px 0 #B88E1F;}
+
+.scrollHint{position:absolute;bottom:28px;font-size:12px;color:rgba(255,246,233,.4);
+  letter-spacing:2px;animation:bob 1.8s ease-in-out infinite;}
+@keyframes bob{0%,100%{transform:translateY(0);}50%{transform:translateY(6px);}}
+
+/* ---------------- SECTIONS ---------------- */
+section{padding:90px 0;}
+.sectionEyebrow{font-family:'Mochiy Pop One',sans-serif;font-size:12px;letter-spacing:4px;
+  color:var(--pink);margin-bottom:10px;}
+h2{font-family:'Mochiy Pop One',sans-serif;font-size:clamp(24px,4vw,34px);margin:0 0 36px 0;
+  color:var(--cream);}
+
+/* tracklist */
+.track{display:flex;align-items:center;gap:22px;padding:20px 22px;border-radius:16px;
+  margin-bottom:12px;border:1px solid rgba(255,246,233,.08);
+  opacity:0;transform:translateY(18px);transition:opacity .5s ease, transform .5s ease, background .2s ease;}
+.track.in{opacity:1;transform:translateY(0);}
+.track:hover{background:rgba(255,246,233,.05);}
+.trackNum{font-family:'Mochiy Pop One',sans-serif;font-size:13px;color:rgba(255,246,233,.4);
+  width:34px;flex-shrink:0;}
+.trackSwatch{width:14px;height:44px;border-radius:6px;flex-shrink:0;}
+.trackBody{flex:1;}
+.trackName{font-family:'Mochiy Pop One',sans-serif;font-size:16px;color:var(--cream);margin-bottom:4px;}
+.trackDesc{font-size:13.5px;color:rgba(255,246,233,.65);line-height:1.6;}
+.trackKeys{display:flex;gap:6px;flex-shrink:0;}
+.miniKey{font-family:'Mochiy Pop One',sans-serif;font-size:10px;color:var(--ink);
+  background:rgba(255,246,233,.85);padding:5px 9px;border-radius:6px;letter-spacing:.5px;}
+
+/* controls */
+.controlsBox{display:flex;flex-wrap:wrap;gap:14px;justify-content:center;margin:26px 0 10px 0;}
+.keycapBig{font-family:'Mochiy Pop One',sans-serif;font-size:16px;color:var(--ink);
+  background:var(--cream);border-radius:12px;padding:16px 26px;min-width:36px;text-align:center;
+  box-shadow:0 4px 0 rgba(0,0,0,.3);}
+.controlsNote{text-align:center;color:rgba(255,246,233,.6);font-size:13.5px;max-width:480px;
+  margin:18px auto 0 auto;line-height:1.8;}
+
+/* features */
+.features{display:grid;grid-template-columns:repeat(auto-fit, minmax(210px,1fr));gap:16px;}
+.feature{border:1px solid rgba(255,246,233,.1);border-radius:16px;padding:22px;
+  background:rgba(255,246,233,.03);}
+.feature .icon{font-size:26px;margin-bottom:10px;display:block;}
+.feature h3{font-family:'Mochiy Pop One',sans-serif;font-size:14.5px;margin:0 0 8px 0;color:var(--yellow);}
+.feature p{font-size:13px;line-height:1.7;color:rgba(255,246,233,.7);margin:0;}
+
+/* footer CTA */
+.footerCta{text-align:center;padding:100px 0 70px 0;}
+.footerCta h2{margin-bottom:18px;}
+footer.credit{text-align:center;padding:28px 0 40px 0;font-size:12px;color:rgba(255,246,233,.35);}
+footer.credit a{text-decoration:underline;}
+
+@media (max-width:600px){
+  .track{flex-wrap:wrap;}
+  .trackKeys{width:100%;justify-content:flex-start;margin-top:6px;}
+}
+</style>
+</head>
+<body>
+
+<section class="hero">
+  <div class="ringStage">
+    <div class="pulseRing r1"></div>
+    <div class="pulseRing r2"></div>
+    <div class="pulseRing r3"></div>
+    <div class="pulseRing r4"></div>
+    <div class="coreDot">BEAT</div>
+  </div>
+  <div class="eyebrow">3D RHYTHM STAGE GAME</div>
+  <h1 class="title">リズム★オーケストラ</h1>
+  <p class="tagline">
+    まったく違う7つのミニゲームが、ひとつのビートでつながっている。<br>
+    タップも、長押しも、AIとの駆け引きも。ブラウザだけで今すぐ遊べる、3Dリズムゲーム集。
+  </p>
+  <a class="playBtn" href="game.html">▶ 今すぐ遊ぶ</a>
+  <div class="scrollHint">SCROLL ▾</div>
+</section>
+
+<div class="wrap">
+
+  <section id="tracklist">
+    <div class="sectionEyebrow">TRACKLIST</div>
+    <h2>7つのステージ、7つの異なる遊び方</h2>
+
+    <div class="track" data-swatch="#2C2140">
+      <div class="trackNum">01</div>
+      <div class="trackSwatch" style="background:#2C2140;"></div>
+      <div class="trackBody">
+        <div class="trackName">ビートドラム</div>
+        <div class="trackDesc">奥から飛んでくるノーツをタップ。時々混ざる長押しノーツも見逃さずに。</div>
+      </div>
+      <div class="trackKeys"><span class="miniKey">SPACE</span></div>
+    </div>
+
+    <div class="track" data-swatch="#3A2A18">
+      <div class="trackNum">02</div>
+      <div class="trackSwatch" style="background:#3A2A18;"></div>
+      <div class="trackBody">
+        <div class="trackName">みぎひだりマーチ</div>
+        <div class="trackDesc">光ったサインの方向にステップ。判定だけがシンプルに返ってくる潔さ。</div>
+      </div>
+      <div class="trackKeys"><span class="miniKey">A</span><span class="miniKey">D</span></div>
+    </div>
+
+    <div class="track" data-swatch="#2A1830">
+      <div class="trackNum">03</div>
+      <div class="trackSwatch" style="background:#2A1830;"></div>
+      <div class="trackBody">
+        <div class="trackName">おうえんコール</div>
+        <div class="trackDesc">4人でまわすコール&レスポンス。↓の下にいるのが自分、自分の番だけ反応しよう。</div>
+      </div>
+      <div class="trackKeys"><span class="miniKey">SPACE</span></div>
+    </div>
+
+    <div class="track" data-swatch="#0A0E24">
+      <div class="trackNum">04</div>
+      <div class="trackSwatch" style="background:#0A0E24;"></div>
+      <div class="trackBody">
+        <div class="trackName">花火マスター</div>
+        <div class="trackDesc">導火線を長押しで着火、タイミングよく離して夜空に打ち上げる。PERFECTは特に派手。</div>
+      </div>
+      <div class="trackKeys"><span class="miniKey">SPACE</span></div>
+    </div>
+
+    <div class="track" data-swatch="#241640">
+      <div class="trackNum">05</div>
+      <div class="trackSwatch" style="background:#241640;"></div>
+      <div class="trackBody">
+        <div class="trackName">3レーンビート</div>
+        <div class="trackDesc">3本のレーンをタップ＆長押しで叩き分ける、指と目がフル稼働のステージ。</div>
+      </div>
+      <div class="trackKeys"><span class="miniKey">A</span><span class="miniKey">S</span><span class="miniKey">D</span></div>
+    </div>
+
+    <div class="track" data-swatch="#101820">
+      <div class="trackNum">06</div>
+      <div class="trackSwatch" style="background:#101820;"></div>
+      <div class="trackBody">
+        <div class="trackName">AIリズムホッケー</div>
+        <div class="trackDesc">左右に動きながらAIとパックを打ち合う。狙ってくる位置はランダム、構えが試される。</div>
+      </div>
+      <div class="trackKeys"><span class="miniKey">A</span><span class="miniKey">D</span><span class="miniKey">SPACE</span></div>
+    </div>
+
+    <div class="track" data-swatch="#1E1E2E">
+      <div class="trackNum">07</div>
+      <div class="trackSwatch" style="background:#1E1E2E;"></div>
+      <div class="trackBody">
+        <div class="trackName">AIとのふたり綱渡り</div>
+        <div class="trackDesc">最終ステージ。相棒AIと息を合わせないと、ミスがそのままふたりのバランスを崩す。</div>
+      </div>
+      <div class="trackKeys"><span class="miniKey">SPACE</span></div>
+    </div>
+  </section>
+
+  <section id="highlights">
+    <div class="sectionEyebrow">MAKING OF</div>
+    <h2>見どころ・工夫したところ</h2>
+    <div class="features">
+      <div class="feature">
+        <span class="icon">🎯</span>
+        <h3>「押した瞬間」じゃなく「見た目」で判定</h3>
+        <p>マーチのハードルは、押した瞬間ではなく実際にジャンプの頂点がハードルに重なる早めのタイミングを正解にしている。見た目と判定がズレない「本当に避けている感覚」にこだわった。</p>
+      </div>
+      <div class="feature">
+        <span class="icon">✋</span>
+        <h3>タップと長押し、両方を1つのエンジンで</h3>
+        <p>全7ステージ共通の判定エンジンが、瞬間タップと押しっぱなしノーツの両方を扱う。ステージごとに違う操作でも、裏側の判定ロジックは1本にまとめてある。</p>
+      </div>
+      <div class="feature">
+        <span class="icon">🤖</span>
+        <h3>ただのAIじゃない、性格のあるAI</h3>
+        <p>ホッケーのAIは狙う位置を毎回変えてくるし、二人三脚のAIはこちらのミスで本当によろける。数値を返すだけの敵じゃなく、画面の中で一緒に反応する相棒として作った。</p>
+      </div>
+      <div class="feature">
+        <span class="icon">🎼</span>
+        <h3>コードだけで鳴らすBGM</h3>
+        <p>音源ファイルは一切使わず、Web Audio APIでキック・ベース・ハイハットをその場で生成。ステージごとにBPMと音階を変えて、曲っぽさを出している。</p>
+      </div>
+      <div class="feature">
+        <span class="icon">📐</span>
+        <h3>指1本で理解できる操作</h3>
+        <p>使うキーはSPACE・A・S・Dの4つだけ。スマホではその4つが自動でタッチボタンに変わるので、説明書なしで誰でも始められる設計にした。</p>
+      </div>
+      <div class="feature">
+        <span class="icon">🏅</span>
+        <h3>やり込むほど見えてくるSSランク</h3>
+        <p>ミス0・GOODも数回までという結構シビアな条件でしか出ない最高ランク「SS」を用意。ブラウザに記録が残るので、自己ベスト更新を狙う理由ができる。</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="controls">
+    <div class="sectionEyebrow">HOW TO PLAY</div>
+    <h2>操作はこの4キーだけ</h2>
+    <div class="controlsBox">
+      <div class="keycapBig">SPACE</div>
+      <div class="keycapBig">A</div>
+      <div class="keycapBig">S</div>
+      <div class="keycapBig">D</div>
+    </div>
+    <p class="controlsNote">
+      画面の指示に合わせて叩くだけ。メニュー操作も Space か Enter で進められるので、マウスいらず。<br>
+      スマホ・タブレットではタッチボタンが自動で出てくるので、指でもプレイ可能。
+    </p>
+  </section>
+
+  <section id="features">
+    <div class="sectionEyebrow">FEATURES</div>
+    <h2>遊ぶほど積み上がる要素</h2>
+    <div class="features">
+      <div class="feature">
+        <span class="icon">🏆</span>
+        <h3>ランク & リーダーボード</h3>
+        <p>全ステージクリアで総合スコアとランク（最高でSS）が出る。記録はブラウザに保存されて、自己ベストが並んでいく。</p>
+      </div>
+      <div class="feature">
+        <span class="icon">🎧</span>
+        <h3>ステージごとの音とビート</h3>
+        <p>キック・ベース・ハイハットが各ステージのBPMに合わせて鳴る、プロシージャルなサウンド。</p>
+      </div>
+      <div class="feature">
+        <span class="icon">🕹️</span>
+        <h3>タップとホールド、両方ある</h3>
+        <p>ただ叩くだけじゃない。長押しで着火したり、漕いだり、耐えたり。ステージごとに求められる操作が変わる。</p>
+      </div>
+      <div class="feature">
+        <span class="icon">📱</span>
+        <h3>PCでもスマホでも</h3>
+        <p>キーボードでもタッチでも遊べる。インストール不要、リンクを開くだけ。</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="footerCta">
+    <div class="sectionEyebrow">READY?</div>
+    <h2>準備はいい？ビートに乗ろう。</h2>
+    <a class="playBtn" href="game.html">▶ ゲームをはじめる</a>
+  </section>
+
+</div>
+
+<footer class="credit">
+  Built with HTML, JavaScript and Three.js ・ <a href="game.html">ゲームはこちら</a>
+</footer>
+
+<script>
+// gentle scroll-reveal for the tracklist, nothing more
+const items = document.querySelectorAll('.track');
+const io = new IntersectionObserver((entries)=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){
+      e.target.classList.add('in');
+      io.unobserve(e.target);
+    }
+  });
+}, {threshold:0.2});
+items.forEach(el=>io.observe(el));
+</script>
+
+</body>
+</html>
