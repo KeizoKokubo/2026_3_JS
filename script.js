@@ -20,6 +20,7 @@ const students = [
     { title: "FPS迷路", href: "22_隅田康太/FPS_Maze/index.html" },
     { title: "ペンギン飛ばし", href: "22_隅田康太/Penguin-Shot/index.html" }
   ] },
+  { number: "25", name: "武田 和士", works: [{ title: "JavaScript作品", href: "https://irisgravity4-droid.github.io/java/" }] },
   { number: "27", name: "畠山 陽靖", works: [{ title: "CRIMSON LABYRINTH", href: "27_畠山陽靖/Index.html" }] },
   { number: "29", name: "本江 将大", works: [{ title: "COSMIC RAIL 3D", href: "29_本江将大/index.html" }] },
   { number: "30", name: "松木 一紗", works: [{ title: "リズム★オーケストラ", href: "30_松木一紗/index.html" }] },
