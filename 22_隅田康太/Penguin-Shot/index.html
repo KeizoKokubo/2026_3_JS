@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>ペンギン飛ばしゲーム（扇形修正＋黒枠ゲージ）</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Rounded+Mplus+1c:wght@300;500;700&display=swap" rel="stylesheet">
+
+<style>
+body {
+    margin: 0;
+    background: #222;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    font-family: 'Rounded Mplus 1c', sans-serif;
+    color: white;
+}
+
+#gameCanvas {
+    background: linear-gradient(#66aaff, #2288cc);
+    border: 3px solid #fff;
+    border-radius: 10px;
+}
+</style>
+</head>
+
+<body>
+
+<canvas id="gameCanvas" width="1000" height="600"></canvas>
+
+<script>
+/* ============================================================
+   基本変数
+   ============================================================ */
+const canvas = document.getElementById("gameCanvas");
+const ctx = canvas.getContext("2d");
+
+let scene = "title";
+
+let penguin = {
+    x: 150,
+    y: 520,
+    vx: 0,
+    vy: 0,
+    angle: 45,
+    power: 0,
+    isFlying: false
+};
+
+const groundY = 520;
+
+let angleValue = 0;
+let angleSpeed = 1.5;
+
+let powerValue = 0;
+let powerSpeed = 2;
+
+let clickStep = 0;
+
+let cameraX = 0;
+let cameraY = 0;
+
+let autoLaunchTimer = null;
+
+/* ============================================================
+   背景オブジェクト
+   ============================================================ */
+let clouds = [];
+let trees = [];
+let grasses = [];
+
+function createBackground() {
+    for (let i = 0; i < 40; i++) {
+        clouds.push({
+            x: i * 400 + Math.random() * 200,
+            y: 50 + Math.random() * 100,
+            w: 120,
+            h: 60
+        });
+    }
+
+    for (let i = 0; i < 80; i++) {
+        trees.push({
+            x: i * 300 + Math.random() * 200,
+            y: groundY - 60
+        });
+    }
+
+    for (let i = 0; i < 200; i++) {
+        grasses.push({
+            x: i * 150 + Math.random() * 100,
+            y: groundY - 20
+        });
+    }
+}
+
+/* ============================================================
+   初期化
+   ============================================================ */
+function init() {
+    resetPenguin();
+    createBackground();
+}
+
+function resetPenguin() {
+    penguin.x = 150;
+    penguin.y = groundY;
+    penguin.vx = 0;
+    penguin.vy = 0;
+    penguin.angle = 45;
+    penguin.power = 0;
+    penguin.isFlying = false;
+
+    angleValue = 0;
+    angleSpeed = 1.5;
+
+    powerValue = 0;
+    powerSpeed = 2;
+
+    clickStep = 0;
+
+    cameraX = 0;
+    cameraY = 0;
+
+    autoLaunchTimer = null;
+}
+
+/* ============================================================
+   更新処理
+   ============================================================ */
+function update() {
+    if (scene === "play") {
+
+        /* 角度決定フェーズ */
+        if (!penguin.isFlying && clickStep === 0) {
+            angleValue += angleSpeed;
+            if (angleValue >= 90 || angleValue <= 0) angleSpeed *= -1;
+            penguin.angle = angleValue;
+        }
+
+        /* パワー決定フェーズ */
+        if (!penguin.isFlying && clickStep === 1) {
+            powerValue += powerSpeed;
+            if (powerValue >= 100 || powerValue <= 0) powerSpeed *= -1;
+            penguin.power = powerValue;
+        }
+
+        /* 飛行中 */
+        if (penguin.isFlying) {
+            penguin.vy += 0.1;
+            penguin.x += penguin.vx;
+            penguin.y += penguin.vy;
+
+            if (penguin.y >= groundY) {
+                penguin.y = groundY;
+                penguin.isFlying = false;
+                scene = "result";
+            }
+        }
+
+        cameraX = penguin.x - canvas.width / 2;
+        if (cameraX < 0) cameraX = 0;
+
+        cameraY = 0;
+    }
+}
+
+/* ============================================================
+   文字縁取り
+   ============================================================ */
+function strokeText(text, x, y, size = "28px", align = "right") {
+    ctx.font = size + " 'Rounded Mplus 1c', sans-serif";
+    ctx.textAlign = align;
+    ctx.lineWidth = 4;
+    ctx.strokeStyle = "black";
+    ctx.strokeText(text, x, y);
+    ctx.fillStyle = "white";
+    ctx.fillText(text, x, y);
+}
+
+/* ============================================================
+   描画処理
+   ============================================================ */
+function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    if (scene === "title") drawTitle();
+    else if (scene === "play") drawGame();
+    else if (scene === "result") drawResult();
+}
+
+/* ============================================================
+   タイトル
+   ============================================================ */
+function drawTitle() {
+    ctx.textAlign = "center";
+    strokeText("ペンギン飛ばしゲーム", canvas.width / 2, canvas.height / 2 - 40, "60px", "center");
+    strokeText("クリックでスタート", canvas.width / 2, canvas.height / 2 + 40, "30px", "center");
+}
+
+/* ============================================================
+   背景描画
+   ============================================================ */
+function drawBackground() {
+    ctx.fillStyle = "white";
+    clouds.forEach(cloud => {
+        ctx.fillRect(cloud.x - cameraX, cloud.y, cloud.w, cloud.h);
+    });
+
+    trees.forEach(tree => {
+        ctx.fillStyle = "#8B4513";
+        ctx.fillRect(tree.x - cameraX, tree.y, 20, 60);
+
+        ctx.fillStyle = "#228B22";
+        ctx.beginPath();
+        ctx.arc(tree.x - cameraX + 10, tree.y - 20, 40, 0, Math.PI * 2);
+        ctx.fill();
+    });
+
+    grasses.forEach(grass => {
+        ctx.fillStyle = "#00aa00";
+        ctx.fillRect(grass.x - cameraX, grass.y, 10, 20);
+    });
+}
+
+/* ============================================================
+   地面描画
+   ============================================================ */
+function drawGround() {
+    ctx.fillStyle = "#44aa44";
+    ctx.fillRect(-cameraX, groundY, canvas.width + cameraX, 80);
+}
+
+/* ============================================================
+   ペンギン描画
+   ============================================================ */
+function drawPenguin() {
+    ctx.save();
+    ctx.translate(penguin.x - cameraX, penguin.y);
+    ctx.rotate((-penguin.angle) * Math.PI / 180);
+
+    ctx.fillStyle = "black";
+    ctx.beginPath();
+    ctx.arc(0, 0, 25, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.fillStyle = "white";
+    ctx.beginPath();
+    ctx.arc(0, 8, 15, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.fillStyle = "orange";
+    ctx.beginPath();
+    ctx.moveTo(25, 0);
+    ctx.lineTo(40, -5);
+    ctx.lineTo(40, 5);
+    ctx.closePath();
+    ctx.fill();
+
+    ctx.restore();
+}
+
+/* ============================================================
+   角度UI（扇形＋矢印）右向きに修正
+   ============================================================ */
+function drawAngleUI() {
+    const cx = penguin.x - cameraX + 80;
+    const cy = penguin.y - 40;
+
+    /* ★右向きの扇形（0°〜90°） */
+    ctx.fillStyle = "rgba(255,255,255,0.2)";
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.arc(cx, cy, 120, 0, -Math.PI / 2, true);
+    ctx.closePath();
+    ctx.fill();
+
+    /* 角度矢印（右向き基準） */
+    const rad = penguin.angle * Math.PI / 180;
+    const arrowX = cx + Math.cos(rad) * 120;
+    const arrowY = cy - Math.sin(rad) * 120;
+
+    ctx.strokeStyle = "red";
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.lineTo(arrowX, arrowY);
+    ctx.stroke();
+
+    strokeText("角度: " + Math.floor(penguin.angle) + "°", cx + 150, cy - 20, "28px", "left");
+}
+
+/* ============================================================
+   パワーゲージ（黒枠）
+   ============================================================ */
+function drawPowerGauge() {
+    const gx = canvas.width / 2 - 150;
+    const gy = 150;
+
+    /* ★黒枠に変更 */
+    ctx.strokeStyle = "black";
+    ctx.lineWidth = 4;
+    ctx.strokeRect(gx, gy, 300, 30);
+
+    ctx.fillStyle = "yellow";
+    ctx.fillRect(gx, gy, 3 * penguin.power, 30);
+
+    strokeText("パワー: " + Math.floor(penguin.power) + "%", gx + 150, gy - 20, "28px", "center");
+}
+
+/* ============================================================
+   メインゲーム描画
+   ============================================================ */
+function drawGame() {
+    drawBackground();
+    drawGround();
+    drawPenguin();
+
+    const uiX = canvas.width - 40;
+
+    if (clickStep === 0) {
+        drawAngleUI();
+        strokeText("角度を決めてください（クリック）", uiX, 40);
+    }
+
+    if (clickStep === 1) {
+        drawPowerGauge();
+        strokeText("パワーを決めてください（クリック）", uiX, 40);
+    }
+
+    const height = Math.floor((groundY - penguin.y) * 0.5);
+    const distance = Math.floor((penguin.x - 150) * 0.25 * 0.5);
+
+    strokeText("距離: " + distance + "m", uiX, 190);
+    strokeText("高さ: " + height + "m", uiX, 230);
+}
+
+/* ============================================================
+   リザルト
+   ============================================================ */
+function drawResult() {
+    drawBackground();
+    drawGround();
+    drawPenguin();
+
+    const centerX = canvas.width / 2;
+
+    strokeText("結果", centerX, canvas.height / 2 - 60, "60px", "center");
+
+    const distance = (penguin.x - 150) * 0.25 * 0.5;
+    strokeText("飛んだ距離: " + Math.floor(distance) + "m", centerX, canvas.height / 2, "36px", "center");
+
+    strokeText("クリックでタイトルへ戻る", centerX, canvas.height / 2 + 60, "28px", "center");
+}
+
+/* ============================================================
+   クリック操作
+   ============================================================ */
+canvas.addEventListener("click", () => {
+    if (scene === "title") {
+        scene = "play";
+        resetPenguin();
+        return;
+    }
+
+    if (scene === "play") {
+        if (clickStep === 0) {
+            clickStep = 1;
+        } else if (clickStep === 1) {
+            clickStep = 2;
+
+            /* ★パワー決定後 0.7秒で自動発射 */
+            autoLaunchTimer = setTimeout(() => {
+                const rad = penguin.angle * Math.PI / 180;
+                penguin.vx = Math.cos(rad) * penguin.power * 0.4;
+                penguin.vy = -Math.sin(rad) * penguin.power * 0.4;
+                penguin.isFlying = true;
+            }, 700);
+        }
+        return;
+    }
+
+    if (scene === "result") {
+        scene = "title";
+    }
+});
+
+/* ============================================================
+   メインループ
+   ============================================================ */
+function gameLoop() {
+    update();
+    draw();
+    requestAnimationFrame(gameLoop);
+}
+
+init();
+gameLoop();
+</script>
+
+</body>
+</html>

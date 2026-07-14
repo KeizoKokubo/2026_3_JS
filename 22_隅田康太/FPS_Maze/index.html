@@ -1,0 +1,1051 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8" />
+<title>FPS迷路</title>
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<style>
+  html,body{height:100%;margin:0;background:#0b1220;color:#fff;font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial;}
+  #wrap{position:fixed;inset:0;overflow:hidden}
+  canvas{display:block;width:100%;height:100%}
+
+  /* タイトル / スタート */
+  #title{position:fixed;inset:0;z-index:40;display:flex;align-items:center;justify-content:center;flex-direction:column;background:rgba(0,0,0,0.7);}
+  #title h1{font-size:40px;margin:0 0 12px}
+  #start{padding:12px 28px;font-size:18px;border-radius:999px;border:0;background:linear-gradient(90deg,#00aaff,#ff4080);color:#fff;cursor:pointer}
+
+  /* ジョイスティック（右下） */
+  #joystick{position:fixed;right:18px;bottom:18px;width:140px;height:140px;border-radius:50%;background:rgba(255,255,255,0.03);border:2px solid rgba(255,255,255,0.06);z-index:50;touch-action:none;display:flex;align-items:center;justify-content:center}
+  #knob{width:64px;height:64px;border-radius:50%;background:radial-gradient(circle at 30% 30%,#ff6666,#0066ff);box-shadow:0 6px 18px rgba(0,0,0,0.6);transform:translate(0,0);pointer-events:none}
+
+  /* スマホ用ヒントボタン（左下） */
+  #mobileHintBtn{
+    position:fixed;
+    left:18px;
+    bottom:18px;
+    width:140px;
+    height:140px;
+    border-radius:50%;
+    background:rgba(255,255,255,0.12);
+    border:2px solid rgba(255,255,255,0.12);
+    z-index:120; /* ジョイスティックより上に */
+    display:none; /* ヒント解禁まで非表示 */
+    touch-action:none;
+    align-items:center;
+    justify-content:center;
+    display:flex;
+    color:#fff;
+    font-weight:700;
+    font-size:13px;
+    text-align:center;
+    -webkit-user-select:none;
+    user-select:none;
+    box-shadow:0 6px 18px rgba(0,0,0,0.35);
+  }
+  #mobileHintBtn.hidden{display:none}
+
+  /* HUD */
+  #hud{position:fixed;left:12px;top:12px;z-index:60;background:rgba(0,0,0,0.35);padding:8px 10px;border-radius:8px;font-size:14px}
+
+  /* UI */
+  #ui{position:fixed;right:12px;top:12px;z-index:60;display:flex;gap:8px;}
+  .btn{padding:8px 10px;border-radius:8px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);color:#fff;cursor:pointer;font-size:13px;}
+
+  /* ミニマップ */
+  #minimapWrap{position:fixed;right:12px;top:60px;z-index:70;background:rgba(0,0,0,0.45);padding:6px;border-radius:8px;display:none;flex-direction:column;align-items:center;}
+  #minimap{display:block;width:200px;height:200px;background:#e6eef6;image-rendering:pixelated;border-radius:4px;}
+  #minimapLabel{color:#fff;font-size:12px;margin-top:6px;text-align:center;}
+
+  /* マップ表示ヒント */
+  #mapHint{position:fixed;left:50%;transform:translateX(-50%);top:6%;z-index:130;display:none;align-items:center;gap:10px;background:rgba(0,0,0,0.7);padding:8px 14px;border-radius:8px;font-size:16px;color:#fff;}
+  #mapHint .label{font-weight:600;display:none;}
+  #mapHint .timer{color:#ffd966;font-weight:700;margin-left:8px;}
+
+  /* ゴールオーバーレイ（中央） */
+  #levelOverlay{
+    position:fixed;
+    left:50%;
+    top:50%;
+    transform:translate(-50%,-50%);
+    z-index:140;
+    display:none;
+    align-items:center;
+    gap:12px;
+    background:rgba(0,0,0,0.7);
+    padding:12px 18px;
+    border-radius:10px;
+  }
+  #levelOverlay .label{font-size:18px;color:#fff;}
+  #levelOverlay .action{padding:8px 12px;border-radius:8px;background:linear-gradient(90deg,#00ff88,#00aaff);color:#002;cursor:pointer;border:0;font-weight:600;}
+  #levelOverlay .secondary{padding:8px 12px;border-radius:8px;background:rgba(255,255,255,0.06);color:#fff;cursor:pointer;border:1px solid rgba(255,255,255,0.08);}
+
+  @media (max-width:420px){
+    #mapHint{font-size:14px;top:8%;}
+    #minimap{width:160px;height:160px;}
+    #mobileHintBtn{width:120px;height:120px;left:12px;bottom:12px;}
+    #joystick{width:120px;height:120px;right:12px;bottom:12px;}
+  }
+</style>
+</head>
+<body>
+<div id="wrap"></div>
+
+<div id="title">
+  <h1>FPS迷路</h1>
+  <button id="start">スタート</button>
+</div>
+
+<div id="joystick" aria-hidden="true"><div id="knob"></div></div>
+<div id="mobileHintBtn" aria-hidden="true" aria-label="ヒントボタン">ヒント<br>押している間表示</div>
+
+<div id="hud">準備中</div>
+<div id="ui">
+  <button id="regen" class="btn">迷路再生成</button>
+  <button id="reset" class="btn">リセット位置</button>
+</div>
+
+<div id="minimapWrap">
+  <canvas id="minimap" width="200" height="200"></canvas>
+  <div id="minimapLabel">ミニマップ（押している間表示）</div>
+</div>
+
+<div id="mapHint" role="status" aria-live="polite">
+  <span class="label">スペースでマップ表示</span>
+  <span class="timer" id="mapHintTimer">--</span>
+</div>
+
+<div id="levelOverlay" role="dialog" aria-hidden="true">
+  <div class="label">レベルクリア！</div>
+  <button id="nextLevel" class="action">次のレベルへ</button>
+  <button id="replayLevel" class="secondary">もう一度</button>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+/* ===========================
+   参照と初期設定
+   =========================== */
+const wrap = document.getElementById('wrap');
+const title = document.getElementById('title');
+const startBtn = document.getElementById('start');
+const joystick = document.getElementById('joystick');
+const knob = document.getElementById('knob');
+const mobileHintBtn = document.getElementById('mobileHintBtn');
+const hud = document.getElementById('hud');
+const regenBtn = document.getElementById('regen');
+const resetBtn = document.getElementById('reset');
+
+const minimapWrap = document.getElementById('minimapWrap');
+const minimapCanvas = document.getElementById('minimap');
+const mmCtx = minimapCanvas.getContext('2d');
+
+const mapHint = document.getElementById('mapHint');
+const mapHintTimer = document.getElementById('mapHintTimer');
+const mapHintLabel = mapHint.querySelector('.label');
+
+const levelOverlay = document.getElementById('levelOverlay');
+const nextLevelBtn = document.getElementById('nextLevel');
+const replayLevelBtn = document.getElementById('replayLevel');
+
+let gameStarted = false;
+let showMap = false;
+let mapHintRemaining = 0;
+let mapHintInterval = null;
+
+/* モバイル判定 */
+const isMobile = /iPhone|iPad|Android/.test(navigator.userAgent);
+
+/* ===========================
+   Three.js 初期化
+   =========================== */
+const renderer = new THREE.WebGLRenderer({ antialias:true });
+renderer.setPixelRatio(window.devicePixelRatio || 1);
+renderer.setSize(window.innerWidth, window.innerHeight);
+wrap.appendChild(renderer.domElement);
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x87ceeb);
+scene.fog = new THREE.FogExp2(0x87ceeb, 0.0025);
+
+const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 4000);
+
+scene.add(new THREE.HemisphereLight(0xffffff, 0x444466, 0.9));
+const dir = new THREE.DirectionalLight(0xffffff, 0.9);
+dir.position.set(30,50,30);
+scene.add(dir);
+
+/* ===========================
+   床
+   =========================== */
+let floor = null;
+function createFloor(size){
+  if(floor) scene.remove(floor);
+  const geo = new THREE.PlaneGeometry(size, size);
+  const mat = new THREE.MeshPhongMaterial({ color:0xffffff });
+  floor = new THREE.Mesh(geo, mat);
+  floor.rotation.x = -Math.PI/2;
+  scene.add(floor);
+}
+createFloor(120);
+
+/* ===========================
+   迷路パラメータ
+   =========================== */
+const ORIGINAL_BASE = 15;
+const BASE_CELL_COUNT = Math.floor(ORIGINAL_BASE / 2);
+let cellCols = BASE_CELL_COUNT;
+let cellRows = BASE_CELL_COUNT;
+let currentLevel = 1;
+const cellSize = 4;
+const MAX_CELLS = 41;
+
+function mazeOffsetX(cols){ return - (cols * cellSize) / 2 + cellSize/2; }
+function mazeOffsetZ(rows){ return - (rows * cellSize) / 2 + cellSize/2; }
+
+let walls = [];
+let logicalGrid = null;
+
+/* ===========================
+   プレイヤー
+   =========================== */
+const player = {
+  pos: new THREE.Vector3(0, 1.6, 0),
+  radius: 0.5,
+  height: 1.6,
+  speed: 6.0,
+  rotSpeed: 2.8
+};
+
+/* ===========================
+   テクスチャ・ユーティリティ
+   =========================== */
+function shadeColor(color, percent) {
+  const f = parseInt(color.slice(1),16);
+  const t = percent < 0 ? 0 : 255;
+  const p = Math.abs(percent)/100;
+  const R = f>>16;
+  const G = f>>8 & 0x00FF;
+  const B = f & 0x0000FF;
+  const newR = Math.round((t - R)*p) + R;
+  const newG = Math.round((t - G)*p) + G;
+  const newB = Math.round((t - B)*p) + B;
+  return "#" + (0x1000000 + (newR)*0x10000 + (newG)*0x100 + (newB)).toString(16).slice(1);
+}
+function createBrickTexture(tileW = 256, tileH = 128, brickColor = '#8B3A2F', mortarColor = '#dcd6d0') {
+  const cvs = document.createElement('canvas');
+  cvs.width = tileW;
+  cvs.height = tileH;
+  const ctx = cvs.getContext('2d');
+
+  ctx.fillStyle = mortarColor;
+  ctx.fillRect(0,0,tileW,tileH);
+
+  const brickH = Math.floor(tileH / 2.2);
+  const brickW = Math.floor(tileW / 3.5);
+
+  ctx.fillStyle = brickColor;
+  ctx.strokeStyle = shadeColor(brickColor, -12);
+  ctx.lineWidth = 2;
+
+  for(let row=0; row<Math.ceil(tileH / (brickH + 4)); row++){
+    const y = row * (brickH + 4) + 2;
+    const offset = (row % 2 === 0) ? 0 : Math.floor(brickW/2);
+    for(let x = -offset; x < tileW; x += brickW + 4){
+      ctx.fillStyle = brickColor;
+      ctx.fillRect(x + 2, y, brickW, brickH);
+      ctx.strokeRect(x + 2, y, brickW, brickH);
+    }
+  }
+
+  const tex = new THREE.CanvasTexture(cvs);
+  tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+  tex.generateMipmaps = true;
+  tex.minFilter = THREE.LinearMipMapLinearFilter;
+  tex.magFilter = THREE.LinearFilter;
+  tex.anisotropy = renderer.capabilities.getMaxAnisotropy();
+  tex.offset.set(0.0005, 0.0005);
+  return tex;
+}
+const brickTexture = createBrickTexture();
+const brickMaterial = new THREE.MeshPhongMaterial({ map: brickTexture, shininess:8 });
+
+/* ===========================
+   迷路生成関連
+   =========================== */
+function updateMazeSizeForLevel(){
+  const exponent = currentLevel - 2;
+  const multiplier = Math.pow(2, exponent);
+  const target = Math.min(MAX_CELLS, Math.max(3, Math.round(ORIGINAL_BASE * multiplier)));
+  cellCols = target;
+  cellRows = target;
+  const needed = Math.max(120, (Math.max(cellCols, cellRows) * cellSize) + 24);
+  createFloor(needed);
+  camera.far = Math.max(1000, needed * 10);
+  camera.updateProjectionMatrix();
+}
+
+function makeCellGrid(cols, rows){
+  const grid = [];
+  for(let r=0;r<rows;r++){
+    const row = [];
+    for(let c=0;c<cols;c++){
+      row.push({ visited:false, walls:[true,true,true,true] });
+    }
+    grid.push(row);
+  }
+  return grid;
+}
+
+function carveCells(grid){
+  const cols = grid[0].length;
+  const rows = grid.length;
+  const stack = [];
+  const start = {c:0, r:0};
+  grid[start.r][start.c].visited = true;
+  stack.push(start);
+
+  function neighbors(cell){
+    const list = [];
+    const dirs = [
+      {dc:0, dr:-1, wall:0, opp:2},
+      {dc:1, dr:0, wall:1, opp:3},
+      {dc:0, dr:1, wall:2, opp:0},
+      {dc:-1, dr:0, wall:3, opp:1}
+    ];
+    for(const d of dirs){
+      const nc = cell.c + d.dc;
+      const nr = cell.r + d.dr;
+      if(nc >=0 && nc < cols && nr >=0 && nr < rows){
+        if(!grid[nr][nc].visited) list.push({nc,nr,d});
+      }
+    }
+    return list;
+  }
+
+  while(stack.length){
+    const current = stack[stack.length-1];
+    const nbs = neighbors(current);
+    if(nbs.length === 0){
+      stack.pop();
+    } else {
+      const pick = nbs[Math.floor(Math.random()*nbs.length)];
+      grid[current.r][current.c].walls[pick.d.wall] = false;
+      grid[pick.nr][pick.nc].walls[pick.d.opp] = false;
+      grid[pick.nr][pick.nc].visited = true;
+      stack.push({c:pick.nc, r:pick.nr});
+    }
+  }
+  return grid;
+}
+
+function adjustBoxUVs(geometry){
+  const uvAttr = geometry.attributes.uv;
+  for(let i=0;i<uvAttr.count;i++){
+    const u = uvAttr.getX(i);
+    const v = uvAttr.getY(i);
+    const shrink = 0.998;
+    const u2 = 0.5 + (u - 0.5) * shrink;
+    const v2 = 0.5 + (v - 0.5) * shrink;
+    uvAttr.setXY(i, u2, v2);
+  }
+  uvAttr.needsUpdate = true;
+}
+
+function buildMazeFromCells(grid){
+  for(const w of walls) scene.remove(w.mesh);
+  walls = [];
+
+  const cols = grid[0].length;
+  const rows = grid.length;
+  const wallHeight = 3.6;
+  const wallThickness = 0.3;
+  const offsetX = mazeOffsetX(cols);
+  const offsetZ = mazeOffsetZ(rows);
+
+  const repeatX = Math.max(1, cols/4);
+  const repeatY = Math.max(1, rows/4);
+  brickTexture.repeat.set(Math.max(0.999, repeatX - 0.001), Math.max(0.999, repeatY - 0.001));
+  brickTexture.needsUpdate = true;
+
+  for(let r=0;r<rows;r++){
+    for(let c=0;c<cols;c++){
+      const cell = grid[r][c];
+      const cx = offsetX + c * cellSize;
+      const cz = offsetZ + r * cellSize;
+
+      if(cell.walls[0]){ // North
+        const geo = new THREE.BoxGeometry(cellSize + wallThickness, wallHeight, wallThickness);
+        adjustBoxUVs(geo);
+        const mesh = new THREE.Mesh(geo, brickMaterial);
+        mesh.position.set(cx, wallHeight/2, cz - cellSize/2);
+        scene.add(mesh);
+        walls.push({mesh, box: new THREE.Box3().setFromObject(mesh)});
+      }
+      if(cell.walls[1]){ // East
+        const geo = new THREE.BoxGeometry(wallThickness, wallHeight, cellSize + wallThickness);
+        adjustBoxUVs(geo);
+        const mesh = new THREE.Mesh(geo, brickMaterial);
+        mesh.position.set(cx + cellSize/2, wallHeight/2, cz);
+        scene.add(mesh);
+        walls.push({mesh, box: new THREE.Box3().setFromObject(mesh)});
+      }
+      if(cell.walls[2]){ // South
+        const geo = new THREE.BoxGeometry(cellSize + wallThickness, wallHeight, wallThickness);
+        adjustBoxUVs(geo);
+        const mesh = new THREE.Mesh(geo, brickMaterial);
+        mesh.position.set(cx, wallHeight/2, cz + cellSize/2);
+        scene.add(mesh);
+        walls.push({mesh, box: new THREE.Box3().setFromObject(mesh)});
+      }
+      if(cell.walls[3]){ // West
+        const geo = new THREE.BoxGeometry(wallThickness, wallHeight, cellSize + wallThickness);
+        adjustBoxUVs(geo);
+        const mesh = new THREE.Mesh(geo, brickMaterial);
+        mesh.position.set(cx - cellSize/2, wallHeight/2, cz);
+        scene.add(mesh);
+        walls.push({mesh, box: new THREE.Box3().setFromObject(mesh)});
+      }
+    }
+  }
+}
+
+/* ===========================
+   デッドエンド探索と距離計算
+   =========================== */
+function findDeadEnds(grid){
+  const rows = grid.length;
+  const cols = grid[0].length;
+  const deadEnds = [];
+  for(let r=0;r<rows;r++){
+    for(let c=0;c<cols;c++){
+      const cell = grid[r][c];
+      let open = 0;
+      for(let i=0;i<4;i++) if(!cell.walls[i]) open++;
+      if(open === 1) deadEnds.push({r,c});
+    }
+  }
+  return deadEnds;
+}
+function computeDistancesFromStart(grid, startR = 0, startC = 0){
+  const rows = grid.length;
+  const cols = grid[0].length;
+  const dist = Array.from({length:rows}, ()=>Array(cols).fill(-1));
+  const q = [];
+  dist[startR][startC] = 0;
+  q.push({r:startR, c:startC});
+  while(q.length){
+    const cur = q.shift();
+    const d = dist[cur.r][cur.c];
+    const cell = grid[cur.r][cur.c];
+    const dirs = [
+      {dr:-1, dc:0, wallIdx:0},
+      {dr:0, dc:1, wallIdx:1},
+      {dr:1, dc:0, wallIdx:2},
+      {dr:0, dc:-1, wallIdx:3}
+    ];
+    for(const dir of dirs){
+      const nr = cur.r + dir.dr;
+      const nc = cur.c + dir.dc;
+      if(nr < 0 || nr >= rows || nc < 0 || nc >= cols) continue;
+      if(!cell.walls[dir.wallIdx] && dist[nr][nc] === -1){
+        dist[nr][nc] = d + 1;
+        q.push({r:nr, c:nc});
+      }
+    }
+  }
+  return dist;
+}
+
+/* ===========================
+   ゴール光削除・グロー
+   =========================== */
+function removeExistingGoalLights(){
+  const oldGroup = scene.getObjectByName('goalLightGroup');
+  if(oldGroup) scene.remove(oldGroup);
+  const oldGoal = scene.getObjectByName('goal');
+  if(oldGoal) scene.remove(oldGoal);
+  const toRemove = [];
+  scene.traverse(obj=>{
+    if(!obj) return;
+    if(obj.name && (obj.name === 'goalLight' || obj.name.startsWith('goalLight'))) toRemove.push(obj);
+  });
+  for(const o of toRemove) if(o.parent) o.parent.remove(o);
+}
+function makeGlowCanvas(){
+  const s = 128;
+  const cvs = document.createElement('canvas');
+  cvs.width = s; cvs.height = s;
+  const ctx = cvs.getContext('2d');
+  const grd = ctx.createRadialGradient(s/2, s/2, 0, s/2, s/2, s/2);
+  grd.addColorStop(0, 'rgba(153,255,136,0.95)');
+  grd.addColorStop(0.3, 'rgba(153,255,136,0.6)');
+  grd.addColorStop(1, 'rgba(153,255,136,0)');
+  ctx.fillStyle = grd;
+  ctx.fillRect(0,0,s,s);
+  return cvs;
+}
+
+/* ===========================
+   ヒントタイマー（「ヒントまで : 」）
+   =========================== */
+function getHintDurationForLevel(level){
+  if(level === 1) return 30;
+  if(level === 2) return 60;
+  return 180;
+}
+function clearMapHintTimer(){
+  if(mapHintInterval) { clearInterval(mapHintInterval); mapHintInterval = null; }
+  mapHintRemaining = 0;
+  mapHint.style.display = 'none';
+  mapHintLabel.style.display = 'none';
+  mapHintTimer.textContent = '--';
+  // 非表示にする（安全策）
+  mobileHintBtn.style.display = 'none';
+  mobileHintBtn.setAttribute('aria-hidden','true');
+}
+function formatTime(sec){
+  if(sec >= 60) {
+    const m = Math.floor(sec/60);
+    const s = sec % 60;
+    return `${m}分${s}秒`;
+  }
+  return `${sec}秒`;
+}
+function showMapHintForCurrentLevel(){
+  clearMapHintTimer();
+  const sec = getHintDurationForLevel(currentLevel);
+  mapHintRemaining = sec;
+  mapHint.style.display = 'flex';
+  mapHintLabel.style.display = 'none';
+  mapHintTimer.textContent = "ヒントまで : " + formatTime(mapHintRemaining);
+  mapHintInterval = setInterval(()=>{
+    mapHintRemaining--;
+    if(mapHintRemaining <= 0){
+      mapHintTimer.textContent = "ヒントまで : " + formatTime(0);
+      mapHintLabel.style.display = 'inline';
+      // スマホなら左下のヒントボタンを表示
+      if(isMobile){
+        mobileHintBtn.style.display = 'flex';
+        mobileHintBtn.setAttribute('aria-hidden','false');
+      }
+      clearInterval(mapHintInterval);
+      mapHintInterval = null;
+      return;
+    }
+    mapHintTimer.textContent = "ヒントまで : " + formatTime(mapHintRemaining);
+  }, 1000);
+}
+
+/* ===========================
+   迷路再生成（ゴール設置・光柱・ヒント開始）
+   =========================== */
+function regenerateMazeCells(){
+  updateMazeSizeForLevel();
+  logicalGrid = makeCellGrid(cellCols, cellRows);
+  logicalGrid = carveCells(logicalGrid);
+  buildMazeFromCells(logicalGrid);
+
+  const offsetX = mazeOffsetX(cellCols);
+  const offsetZ = mazeOffsetZ(cellRows);
+
+  // スタート位置（入口）: セル(0,0)
+  const startC = 0, startR = 0;
+  player.pos.x = offsetX + startC * cellSize;
+  player.pos.z = offsetZ + startR * cellSize;
+  camera.position.set(player.pos.x, player.pos.y, player.pos.z);
+
+  // スタート向き（通路側を向く）＋180度反転
+  const startCell = logicalGrid[startR][startC];
+  if(!startCell.walls[0]) camera.rotation.y = Math.PI;
+  else if(!startCell.walls[1]) camera.rotation.y = -Math.PI/2;
+  else if(!startCell.walls[2]) camera.rotation.y = 0;
+  else if(!startCell.walls[3]) camera.rotation.y = Math.PI/2;
+  else camera.rotation.y = 0;
+  camera.rotation.y += Math.PI;
+  camera.rotation.y = ((camera.rotation.y + Math.PI) % (2*Math.PI)) - Math.PI;
+
+  // デッドエンドを探して最も遠いものをゴールに
+  const deadEnds = findDeadEnds(logicalGrid);
+  const distances = computeDistancesFromStart(logicalGrid, startR, startC);
+
+  let best = null;
+  let bestDist = -1;
+  for(const d of deadEnds){
+    const dd = distances[d.r][d.c];
+    if(dd === -1) continue;
+    if(dd > bestDist){
+      bestDist = dd;
+      best = d;
+    }
+  }
+
+  let goalR, goalC;
+  if(best){
+    goalR = best.r;
+    goalC = best.c;
+  } else {
+    goalC = cellCols - 1;
+    goalR = cellRows - 1;
+  }
+
+  // 既存のゴール・光柱を削除してから新規追加
+  removeExistingGoalLights();
+
+  const goal = new THREE.Mesh(new THREE.BoxGeometry(2,0.2,2), new THREE.MeshPhongMaterial({ color:0x00ff66 }));
+  goal.position.set(offsetX + goalC * cellSize, 0.1, offsetZ + goalR * cellSize);
+  goal.name = 'goal';
+  scene.add(goal);
+
+  const group = new THREE.Group();
+  group.name = 'goalLightGroup';
+
+  // 高さをユーザー要望で高めに
+  const pillarHeight = 20;
+  const pillarGeo = new THREE.CylinderGeometry(0.6, 0.6, pillarHeight, 16, 1, true);
+  const pillarMat = new THREE.MeshBasicMaterial({ color:0x99ff88, transparent:true, opacity:0.18, depthWrite:false, blending:THREE.AdditiveBlending });
+  const pillar = new THREE.Mesh(pillarGeo, pillarMat);
+  pillar.position.set(goal.position.x, pillarHeight/2 + 0.1, goal.position.z);
+  group.add(pillar);
+
+  const pLight = new THREE.PointLight(0x99ff88, 1.6, 60, 2);
+  pLight.position.set(goal.position.x, pillarHeight - 1, goal.position.z);
+  group.add(pLight);
+
+  const spriteMap = new THREE.CanvasTexture(makeGlowCanvas());
+  spriteMap.needsUpdate = true;
+  const spriteMat = new THREE.SpriteMaterial({ map: spriteMap, color: 0x99ff88, transparent:true, blending:THREE.AdditiveBlending });
+  const sprite = new THREE.Sprite(spriteMat);
+  sprite.scale.set(8,8,1);
+  sprite.position.set(goal.position.x, pillarHeight + 1.5, goal.position.z);
+  group.add(sprite);
+
+  scene.add(group);
+
+  // レベル開始時にヒントタイマーを表示（「ヒントまで : 」付き）
+  showMapHintForCurrentLevel();
+
+  drawMinimap();
+}
+
+/* ===========================
+   ミニマップ描画（扇形と向き修正）
+   =========================== */
+function drawMinimap(){
+  const mmSize = Math.min(minimapCanvas.width, minimapCanvas.height);
+  mmCtx.clearRect(0,0,minimapCanvas.width, minimapCanvas.height);
+  if(!logicalGrid) return;
+
+  const cols = logicalGrid[0].length;
+  const rows = logicalGrid.length;
+  const margin = 4;
+  const drawW = mmSize - margin*2;
+  const drawH = mmSize - margin*2;
+  const cellW = drawW / cols;
+  const cellH = drawH / rows;
+
+  mmCtx.fillStyle = '#dfe8f2';
+  mmCtx.fillRect(0,0,minimapCanvas.width, minimapCanvas.height);
+  mmCtx.fillStyle = '#f6fbff';
+  mmCtx.fillRect(margin, margin, drawW, drawH);
+
+  mmCtx.fillStyle = '#222';
+  const wallThicknessPx = Math.max(1, Math.round(Math.min(cellW, cellH) * 0.12));
+  for(let r=0;r<rows;r++){
+    for(let c=0;c<cols;c++){
+      const cell = logicalGrid[r][c];
+      const x = margin + c * cellW;
+      const y = margin + r * cellH;
+      if(cell.walls[0]) mmCtx.fillRect(x, y, cellW, wallThicknessPx);
+      if(cell.walls[1]) mmCtx.fillRect(x + cellW - wallThicknessPx, y, wallThicknessPx, cellH);
+      if(cell.walls[2]) mmCtx.fillRect(x, y + cellH - wallThicknessPx, cellW, wallThicknessPx);
+      if(cell.walls[3]) mmCtx.fillRect(x, y, wallThicknessPx, cellH);
+    }
+  }
+
+  const goal = scene.getObjectByName('goal');
+  if(goal){
+    const gx = (goal.position.x - mazeOffsetX(cellCols)) / cellSize;
+    const gz = (goal.position.z - mazeOffsetZ(cellRows)) / cellSize;
+    const gxPx = margin + gx * cellW + cellW/2;
+    const gyPx = margin + gz * cellH + cellH/2;
+    mmCtx.fillStyle = '#00aa44';
+    mmCtx.beginPath();
+    mmCtx.arc(gxPx, gyPx, Math.max(3, Math.min(cellW, cellH)*0.25), 0, Math.PI*2);
+    mmCtx.fill();
+  }
+
+  drawPlayerOnMinimap();
+}
+
+function drawPlayerOnMinimap(){
+  if(!logicalGrid) return;
+  const mmSize = Math.min(minimapCanvas.width, minimapCanvas.height);
+  const cols = logicalGrid[0].length;
+  const rows = logicalGrid.length;
+  const margin = 4;
+  const drawW = mmSize - margin*2;
+  const drawH = mmSize - margin*2;
+  const cellW = drawW / cols;
+  const cellH = drawH / rows;
+
+  mmCtx.clearRect(0,0,minimapCanvas.width, minimapCanvas.height);
+  mmCtx.fillStyle = '#dfe8f2';
+  mmCtx.fillRect(0,0,minimapCanvas.width, minimapCanvas.height);
+  mmCtx.fillStyle = '#f6fbff';
+  mmCtx.fillRect(margin, margin, drawW, drawH);
+
+  mmCtx.fillStyle = '#222';
+  const wallThicknessPx = Math.max(1, Math.round(Math.min(cellW, cellH) * 0.12));
+  for(let r=0;r<rows;r++){
+    for(let c=0;c<cols;c++){
+      const cell = logicalGrid[r][c];
+      const x = margin + c * cellW;
+      const y = margin + r * cellH;
+      if(cell.walls[0]) mmCtx.fillRect(x, y, cellW, wallThicknessPx);
+      if(cell.walls[1]) mmCtx.fillRect(x + cellW - wallThicknessPx, y, wallThicknessPx, cellH);
+      if(cell.walls[2]) mmCtx.fillRect(x, y + cellH - wallThicknessPx, cellW, wallThicknessPx);
+      if(cell.walls[3]) mmCtx.fillRect(x, y, wallThicknessPx, cellH);
+    }
+  }
+
+  const goal = scene.getObjectByName('goal');
+  if(goal){
+    const gx = (goal.position.x - mazeOffsetX(cellCols)) / cellSize;
+    const gz = (goal.position.z - mazeOffsetZ(cellRows)) / cellSize;
+    const gxPx = margin + gx * cellW + cellW/2;
+    const gyPx = margin + gz * cellH + cellH/2;
+    mmCtx.fillStyle = '#00aa44';
+    mmCtx.beginPath();
+    mmCtx.arc(gxPx, gyPx, Math.max(3, Math.min(cellW, cellH)*0.25), 0, Math.PI*2);
+    mmCtx.fill();
+  }
+
+  const px = (player.pos.x - mazeOffsetX(cellCols)) / cellSize;
+  const pz = (player.pos.z - mazeOffsetZ(cellRows)) / cellSize;
+  const pxPx = margin + px * cellW + cellW/2;
+  const pzPx = margin + pz * cellH + cellH/2;
+
+  const heading = camera.rotation.y;
+  const dirX = -Math.sin(heading);
+  const dirY = -Math.cos(heading);
+
+  const baseLen = Math.min(cellW, cellH) * 0.9;
+  const len = Math.max(6, baseLen);
+
+  const fanRadius = Math.max(len * 1.6, Math.min(cellW, cellH) * 1.6);
+  const fanSpread = Math.PI / 3;
+  const angle = Math.atan2(dirY, dirX);
+
+  mmCtx.save();
+  mmCtx.beginPath();
+  mmCtx.moveTo(pxPx, pzPx);
+  mmCtx.arc(pxPx, pzPx, fanRadius, angle - fanSpread/2, angle + fanSpread/2);
+  mmCtx.closePath();
+  mmCtx.fillStyle = 'rgba(255,51,51,0.60)';
+  mmCtx.fill();
+  mmCtx.restore();
+
+  mmCtx.fillStyle = '#ff3333';
+  mmCtx.beginPath();
+  mmCtx.arc(pxPx, pzPx, Math.max(3, Math.min(cellW, cellH)*0.22), 0, Math.PI*2);
+  mmCtx.fill();
+
+  const hx = pxPx + dirX * len;
+  const hy = pzPx + dirY * len;
+  mmCtx.strokeStyle = '#ff3333';
+  mmCtx.lineWidth = 2;
+  mmCtx.beginPath();
+  mmCtx.moveTo(pxPx, pzPx);
+  mmCtx.lineTo(hx, hy);
+  mmCtx.stroke();
+}
+
+/* ===========================
+   衝突判定（球 vs Box）
+   =========================== */
+function sphereIntersectsBox(sphereCenter, radius, box){
+  const clamped = sphereCenter.clone();
+  clamped.x = Math.max(box.min.x, Math.min(box.max.x, clamped.x));
+  clamped.y = Math.max(box.min.y, Math.min(box.max.y, clamped.y));
+  clamped.z = Math.max(box.min.z, Math.min(box.max.z, clamped.z));
+  const distSq = clamped.distanceToSquared(sphereCenter);
+  return distSq <= radius * radius;
+}
+
+/* ===========================
+   スティック操作
+   =========================== */
+let rawX = 0, rawY = 0;
+let tiltX = 0, tiltY = 0;
+let dragging = false;
+let center = {x:0,y:0};
+const maxR = 50;
+function updateCenter(){ const rect = joystick.getBoundingClientRect(); center.x = rect.left + rect.width/2; center.y = rect.top + rect.height/2; }
+updateCenter();
+window.addEventListener('resize', updateCenter);
+
+function setStick(clientX, clientY){
+  const dx = clientX - center.x;
+  const dy = clientY - center.y;
+  let dist = Math.sqrt(dx*dx + dy*dy);
+  let nx = dx, ny = dy;
+  if(dist > maxR){ nx = dx * maxR / dist; ny = dy * maxR / dist; dist = maxR; }
+  knob.style.transform = `translate(${nx}px, ${ny}px)`;
+  rawX = nx / maxR;
+  rawY = -ny / maxR;
+  tiltX = rawX;
+  tiltY = rawY;
+}
+function resetStick(){ knob.style.transform = `translate(0px, 0px)`; rawX = rawY = tiltX = tiltY = 0; }
+
+joystick.addEventListener('mousedown', (e)=>{ dragging = true; setStick(e.clientX, e.clientY); });
+window.addEventListener('mousemove', (e)=>{ if(!dragging) return; setStick(e.clientX, e.clientY); });
+window.addEventListener('mouseup', ()=>{ dragging = false; resetStick(); });
+
+joystick.addEventListener('touchstart', (e)=>{ dragging = true; const t = e.touches[0]; setStick(t.clientX, t.clientY); e.preventDefault(); }, {passive:false});
+joystick.addEventListener('touchmove', (e)=>{ if(!dragging) return; const t = e.touches[0]; setStick(t.clientX, t.clientY); e.preventDefault(); }, {passive:false});
+joystick.addEventListener('touchend', ()=>{ dragging = false; resetStick(); });
+
+/* ===========================
+   ゲームループ
+   =========================== */
+let last = performance.now();
+let reachedGoal = false;
+
+function animate(now){
+  requestAnimationFrame(animate);
+  const dt = Math.min((now - last) / 1000, 0.05);
+  last = now;
+
+  if(gameStarted && !reachedGoal){
+    const yawDelta = tiltX * player.rotSpeed * dt;
+    camera.rotation.y -= yawDelta;
+
+    const forward = new THREE.Vector3(0,0,-1).applyEuler(camera.rotation);
+    forward.y = 0;
+    forward.normalize();
+
+    const moveDist = tiltY * player.speed * dt;
+    const desired = player.pos.clone().add(forward.multiplyScalar(moveDist));
+
+    // 壁貫通は組み込まない（常に衝突判定）
+    let collided = false;
+    const sphereCenter = new THREE.Vector3(desired.x, player.height/2, desired.z);
+    for(const w of walls){
+      w.box.setFromObject(w.mesh);
+      if(sphereIntersectsBox(sphereCenter, player.radius, w.box)){
+        collided = true;
+        break;
+      }
+    }
+
+    if(!collided){
+      player.pos.copy(desired);
+    } else {
+      // 軸分離でスライド
+      const desiredX = player.pos.clone().setX(desired.x);
+      const sphereX = new THREE.Vector3(desiredX.x, player.height/2, desiredX.z);
+      let colX = false;
+      for(const w of walls){ w.box.setFromObject(w.mesh); if(sphereIntersectsBox(sphereX, player.radius, w.box)){ colX = true; break; } }
+      if(!colX) player.pos.x = desired.x;
+      else {
+        const desiredZ = player.pos.clone().setZ(desired.z);
+        const sphereZ = new THREE.Vector3(desiredZ.x, player.height/2, desiredZ.z);
+        let colZ = false;
+        for(const w of walls){ w.box.setFromObject(w.mesh); if(sphereIntersectsBox(sphereZ, player.radius, w.box)){ colZ = true; break; } }
+        if(!colZ) player.pos.z = desired.z;
+      }
+    }
+
+    camera.position.x = player.pos.x;
+    camera.position.z = player.pos.z;
+    camera.position.y = player.height;
+
+    hud.textContent = `レベル: ${currentLevel}`;
+
+    if(showMap) drawPlayerOnMinimap();
+
+    const goal = scene.getObjectByName('goal');
+    if(goal){
+      const dx = player.pos.x - goal.position.x;
+      const dz = player.pos.z - goal.position.z;
+      const dist = Math.sqrt(dx*dx + dz*dz);
+      if(dist < 1.5){
+        reachedGoal = true;
+        hud.textContent = `レベル: ${currentLevel} - ゴール！`;
+        onLevelComplete();
+      }
+    }
+  }
+
+  renderer.render(scene, camera);
+}
+requestAnimationFrame(animate);
+
+/* ===========================
+   レベル完了処理
+   =========================== */
+function onLevelComplete(){
+  const prevW = minimapCanvas.width;
+  const prevH = minimapCanvas.height;
+  const newW = prevW * 2;
+  const newH = prevH * 2;
+  minimapCanvas.width = newW;
+  minimapCanvas.height = newH;
+  minimapCanvas.style.width = (prevW * 2) + 'px';
+  minimapCanvas.style.height = (prevH * 2) + 'px';
+  minimapWrap.style.top = '8%';
+  minimapWrap.style.right = '50%';
+  minimapWrap.style.transform = 'translateX(50%)';
+  minimapWrap.style.padding = '10px';
+  minimapWrap.style.background = 'rgba(0,0,0,0.65)';
+  drawMinimap();
+
+  levelOverlay.style.display = 'flex';
+  levelOverlay.setAttribute('aria-hidden', 'false');
+}
+
+/* 次のレベル / リプレイ */
+nextLevelBtn.addEventListener('click', ()=>{
+  currentLevel++;
+  updateMazeSizeForLevel();
+  restoreMinimapSize();
+  regenerateMazeCells();
+  reachedGoal = false;
+  levelOverlay.style.display = 'none';
+  levelOverlay.setAttribute('aria-hidden', 'true');
+  hud.textContent = `レベル ${currentLevel} 開始`;
+});
+
+replayLevelBtn.addEventListener('click', ()=>{
+  restoreMinimapSize();
+  regenerateMazeCells();
+  reachedGoal = false;
+  levelOverlay.style.display = 'none';
+  levelOverlay.setAttribute('aria-hidden', 'true');
+  hud.textContent = `リプレイ レベル ${currentLevel}`;
+});
+
+function restoreMinimapSize(){
+  minimapCanvas.width = 200;
+  minimapCanvas.height = 200;
+  minimapCanvas.style.width = '200px';
+  minimapCanvas.style.height = '200px';
+  minimapWrap.style.top = '60px';
+  minimapWrap.style.right = '12px';
+  minimapWrap.style.transform = 'none';
+  minimapWrap.style.padding = '6px';
+  minimapWrap.style.background = 'rgba(0,0,0,0.45)';
+  drawMinimap();
+}
+
+/* ===========================
+   キー操作（PC: スペースでマップ表示。スマホはボタンで表示）
+   壁貫通は組み込まない
+   =========================== */
+window.addEventListener('keydown', (e) => {
+  if(!isMobile && e.code === 'Space'){
+    const labelVisible = (mapHintLabel.style.display !== 'none');
+    if(labelVisible){
+      if(!showMap){
+        showMap = true;
+        minimapWrap.style.display = 'flex';
+        drawMinimap();
+      }
+    }
+    e.preventDefault();
+  }
+});
+window.addEventListener('keyup', (e) => {
+  if(!isMobile && e.code === 'Space'){
+    showMap = false;
+    minimapWrap.style.display = 'none';
+    e.preventDefault();
+  }
+});
+
+/* ===========================
+   モバイルヒントボタンの挙動（pointer を優先）
+   =========================== */
+function showMinimapForMobile() {
+  if (mapHintLabel.style.display === 'none') return;
+  showMap = true;
+  minimapWrap.style.display = 'flex';
+  drawMinimap();
+}
+function hideMinimapForMobile() {
+  showMap = false;
+  minimapWrap.style.display = 'none';
+}
+
+mobileHintBtn.addEventListener('pointerdown', (e) => {
+  e.preventDefault();
+  showMinimapForMobile();
+}, { passive: false });
+
+window.addEventListener('pointerup', (e) => {
+  hideMinimapForMobile();
+}, { passive: false });
+
+mobileHintBtn.addEventListener('pointercancel', (e) => {
+  hideMinimapForMobile();
+});
+
+mobileHintBtn.addEventListener('touchstart', (e) => {
+  e.preventDefault();
+  showMinimapForMobile();
+}, { passive: false });
+
+mobileHintBtn.addEventListener('touchend', (e) => {
+  e.preventDefault();
+  hideMinimapForMobile();
+}, { passive: false });
+
+mobileHintBtn.addEventListener('touchcancel', (e) => {
+  e.preventDefault();
+  hideMinimapForMobile();
+}, { passive: false });
+
+/* ===========================
+   UI イベント（スタート・再生成・リセット）
+   =========================== */
+startBtn.addEventListener('click', ()=>{
+  title.style.display = 'none';
+  gameStarted = true;
+  currentLevel = 1;
+  updateMazeSizeForLevel();
+  regenerateMazeCells();
+  reachedGoal = false;
+  hud.textContent = `レベル: ${currentLevel}`;
+});
+
+regenBtn.addEventListener('click', ()=>{
+  regenerateMazeCells();
+  reachedGoal = false;
+  hud.textContent = `レベル: ${currentLevel} 再生成`;
+});
+
+resetBtn.addEventListener('click', ()=>{
+  const startC = 0, startR = 0;
+  player.pos.x = mazeOffsetX(cellCols) + startC * cellSize;
+  player.pos.z = mazeOffsetZ(cellRows) + startR * cellSize;
+  camera.position.set(player.pos.x, player.pos.y, player.pos.z);
+  camera.rotation.set(0, camera.rotation.y, 0);
+  reachedGoal = false;
+  hud.textContent = `レベル: ${currentLevel} リセット`;
+});
+
+/* 初期迷路生成 */
+updateMazeSizeForLevel();
+regenerateMazeCells();
+
+/* リサイズ対応 */
+window.addEventListener('resize', ()=>{
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  updateCenter();
+});
+</script>
+</body>
+</html>
