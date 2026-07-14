@@ -7,8 +7,9 @@ const students = [
   { number: "08", name: "岸川 颯汰", works: [{ title: "2Dブラックジャック", href: "08_岸川颯汰/index.html" }] },
   { number: "11", name: "加藤 岳人", works: [{ title: "HTML Tools", href: "11_加藤岳人/提出.html" }] },
   { number: "12", name: "川田 祥也", works: [{ title: "そろばん練習ツール", href: "https://tendonman1010.github.io/TestOnlineTool_Soroban/" }] },
+  { number: "13", name: "菊地 亮太", works: [{ title: "数学パズル・デュエル", href: "13_菊地亮太/index.html" }] },
   { number: "16", name: "久木 瑞貴", works: [{ title: "TETRIS", href: "16_久木瑞貴/index.html" }] },
-  { number: "17", name: "小泉 虎郁人", works: [{ title: "MY WORKS", href: "17_小泉虎郁人/index.html" }] },
+  { number: "17", name: "小泉 虎郁人", works: [{ title: "WEAPON BATTLE", href: "17_小泉虎郁人/index.html" }] },
   { number: "19", name: "齋藤 紡葵", works: [{ title: "Rhythm Mage Battle", href: "19_齋藤紡葵/index.html" }] },
   { number: "20", name: "佐藤 瑠乃", works: [
     { title: "ブロック崩し", href: "20_佐藤瑠乃/BlockBreak/index.html" },

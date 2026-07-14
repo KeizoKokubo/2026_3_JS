@@ -3,183 +3,534 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LINK START // MY WORKS</title>
+    <title>WEAPON BATTLE // OFFICIAL PORTAL</title>
+    <!-- Tailwind CSS (Aesthetic Utility) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts for High-tech typography -->
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@500;700&family=Noto+Sans+JP:wght@300;500;800&display=swap" rel="stylesheet">
     <style>
-        /* --- SAO風ベーススタイル --- */
+        /* --- SAO独自デザインシステム定義 --- */
+        :root {
+            --sao-orange: #ff7f00;
+            --sao-orange-glow: rgba(255, 127, 0, 0.4);
+            --sao-cyan: #00f0ff;
+            --sao-cyan-glow: rgba(0, 240, 255, 0.3);
+            --sao-bg-dark: #0a0d13;
+            --sao-window-bg: rgba(240, 244, 248, 0.06);
+            --sao-window-border: rgba(240, 244, 248, 0.15);
+        }
+
         body {
-            background-color: #0b0f12;
-            color: #e0e6ed;
-            font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', sans-serif;
-            margin: 0;
-            padding: 40px 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+            background-color: var(--sao-bg-dark);
+            color: #e2e8f0;
+            font-family: 'Noto Sans JP', 'Rajdhani', sans-serif;
+            overflow-x: hidden;
+            /* ハニカム（六角形）背景パターンのインラインSVG描画 */
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='49' viewBox='0 0 28 49'%3E%3Cpath d='M14 1L27 8.5V23.5L14 31L1 23.5V8.5L14 1Z' fill='none' stroke='%23ffffff' stroke-width='1' stroke-opacity='0.02'/%3E%3Cpath d='M14 25L27 32.5V47.5L14 55L1 47.5V32.5L14 25Z' fill='none' stroke='%23ffffff' stroke-width='1' stroke-opacity='0.02'/%3E%3C/svg%3E");
+            background-size: 56px 98px;
         }
 
-        header {
-            text-align: center;
-            margin-bottom: 40px;
-            border-bottom: 2px solid #00d2ff;
-            padding-bottom: 10px;
-            width: 100%;
-            max-width: 800px;
+        /* SF風なフォント割り当て */
+        .font-orbitron {
+            font-family: 'Orbitron', sans-serif;
         }
 
-        header h1 {
-            font-size: 24px;
-            letter-spacing: 4px;
-            color: #00d2ff;
-            text-shadow: 0 0 10px rgba(0, 210, 255, 0.5);
-            margin: 0;
+        .font-rajdhani {
+            font-family: 'Rajdhani', sans-serif;
         }
 
-        header .subtitle {
-            font-size: 11px;
-            color: #687d93;
-            letter-spacing: 2px;
-            margin-top: 5px;
+        /* --- SAO風アシンメトリーカット（斜め切り落とし）シェイプ --- */
+        .sao-clipper-l {
+            clip-path: polygon(0 0, 100% 0, 100% calc(100% - 20px), calc(100% - 20px) 100%, 0 100%);
         }
 
-        /* --- メインコンテナ --- */
-        main {
-            width: 100%;
-            max-width: 800px;
-            display: flex;
-            flex-direction: column;
-            gap: 30px;
+        .sao-clipper-r {
+            clip-path: polygon(20px 0, 100% 0, 100% 100%, 0 100%, 0 20px);
         }
 
-        /* --- 作品カード（UIウィンドウ風） --- */
-        .card {
-            background: rgba(16, 24, 32, 0.85);
-            border-left: 4px solid #ff7b00;
-            border-top: 1px solid rgba(0, 210, 255, 0.2);
-            border-right: 1px solid rgba(0, 210, 255, 0.2);
-            border-bottom: 1px solid rgba(0, 210, 255, 0.2);
-            padding: 25px;
-            position: relative;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-            transition: all 0.3s ease;
+        .sao-button-clip {
+            clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px));
         }
 
-        .card:hover {
-            border-left-color: #00d2ff;
-            box-shadow: 0 0 15px rgba(0, 210, 255, 0.2);
-            transform: translateX(5px);
+        /* --- ネオングローエフェクト --- */
+        .glow-orange {
+            box-shadow: 0 0 15px var(--sao-orange-glow);
+            text-shadow: 0 0 8px var(--sao-orange-glow);
         }
 
-        .card h2 {
-            font-size: 20px;
-            margin: 0 0 15px 0;
-            color: #ffffff;
+        .glow-cyan {
+            box-shadow: 0 0 15px var(--sao-cyan-glow);
+            text-shadow: 0 0 8px var(--sao-cyan-glow);
         }
 
-        .info-section {
-            margin-bottom: 20px;
+        /* --- ホログラム起動用回転アニメーション --- */
+        @keyframes rotateClockwise {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
         }
 
-        .info-section h3 {
-            font-size: 12px;
-            color: #00d2ff;
-            letter-spacing: 1px;
-            margin: 15px 0 5px 0;
-            text-transform: uppercase;
+        @keyframes rotateCounter {
+            0% {
+                transform: rotate(360deg);
+            }
+
+            100% {
+                transform: rotate(0deg);
+            }
         }
 
-        .info-section p {
-            font-size: 14px;
-            line-height: 1.6;
-            color: #b0c2d4;
-            margin: 0;
-            white-space: pre-wrap;
+        .holo-ring-1 {
+            animation: rotateClockwise 25s linear infinite;
         }
 
-        .tags {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-            margin-top: 10px;
+        .holo-ring-2 {
+            animation: rotateCounter 15s linear infinite;
         }
 
-        .tag {
-            background: rgba(0, 210, 255, 0.1);
-            border: 1px solid rgba(0, 210, 255, 0.3);
-            color: #00d2ff;
-            font-size: 11px;
-            padding: 2px 8px;
+        /* --- カスタムスクロールバー --- */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #06090d;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--sao-orange);
             border-radius: 3px;
         }
 
-        .btn-link {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            background: transparent;
-            color: #ff7b00;
-            border: 1px solid #ff7b00;
-            padding: 10px 20px;
-            font-size: 13px;
-            font-weight: bold;
-            text-decoration: none;
-            letter-spacing: 1px;
-            transition: all 0.2s ease;
-            margin-top: 15px;
-            cursor: pointer;
-        }
-
-        .btn-link:hover {
-            background: #ff7b00;
-            color: #0b0f12;
-            box-shadow: 0 0 10px rgba(255, 123, 0, 0.5);
-        }
-
-        footer {
-            margin-top: 60px;
-            font-size: 11px;
-            color: #4a5969;
+        /* --- スライドメニュー用スタイル（重なり防止） --- */
+        .floating-nav-container {
+            position: fixed;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 100;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
         }
     </style>
 </head>
-<body>
+<body class="relative">
 
-    <header>
-        <h1>LOG OUT // NOT AVAILABLE</h1>
-        <div class="subtitle">MY CREATIONS & ARTIFACTS</div>
+    <script>
+        // Web Audio API を用いたSAO風の未来システムエフェクト生成
+        let audioCtx = null;
+
+        function initAudio()
+        {
+            if (!audioCtx)
+            {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        // ホバー音（ピピッ）
+        function playHoverSound()
+        {
+            try
+            {
+                initAudio();
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+
+                const now = audioCtx.currentTime;
+                // 1つ目の電子パルス
+                const osc1 = audioCtx.createOscillator();
+                const gain1 = audioCtx.createGain();
+                osc1.type = 'sine';
+                osc1.frequency.setValueAtTime(1800, now);
+                gain1.gain.setValueAtTime(0.04, now);
+                gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+                osc1.connect(gain1);
+                gain1.connect(audioCtx.destination);
+                osc1.start(now);
+                osc1.stop(now + 0.06);
+
+                // 2つ目の高周波パルス（ディレイ）
+                const osc2 = audioCtx.createOscillator();
+                const gain2 = audioCtx.createGain();
+                osc2.type = 'sine';
+                osc2.frequency.setValueAtTime(2400, now + 0.03);
+                gain2.gain.setValueAtTime(0.03, now + 0.03);
+                gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+                osc2.connect(gain2);
+                gain2.connect(audioCtx.destination);
+                osc2.start(now + 0.03);
+                osc2.stop(now + 0.09);
+            } catch (e) { }
+        }
+
+        // 決定音（透き通ったサイバーファンファーレ「ピロローン」）
+        function playConfirmSound()
+        {
+            try
+            {
+                initAudio();
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+
+                const now = audioCtx.currentTime;
+                const freqs = [1046.50, 1318.51, 1567.98, 2093.00]; // C6, E6, G6, C7 の明るい和音アルペジオ
+
+                freqs.forEach((f, index) =>
+                {
+                    const delay = index * 0.04;
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(f, now + delay);
+                    gain.gain.setValueAtTime(0.06, now + delay);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + delay + 0.3);
+
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.start(now + delay);
+                    osc.stop(now + delay + 0.35);
+                });
+            } catch (e) { }
+        }
+
+        // メニュー開閉トグルスクリプト
+        function toggleSystemMenu()
+        {
+            const menu = document.getElementById('sao-system-menu');
+            const trigger = document.getElementById('menu-trigger-btn');
+
+            if (menu.classList.contains('translate-x-[150%]'))
+            {
+                // 開くとき
+                menu.classList.remove('translate-x-[150%]', 'opacity-0', 'pointer-events-none');
+                menu.classList.add('translate-x-0', 'opacity-100');
+                trigger.classList.add('rotate-45', 'border-[#00f0ff]');
+                trigger.classList.remove('border-[#ff7f00]');
+                playConfirmSound();
+            } else
+            {
+                // 閉じるとき
+                menu.classList.remove('translate-x-0', 'opacity-100');
+                menu.classList.add('translate-x-[150%]', 'opacity-0', 'pointer-events-none');
+                trigger.classList.remove('rotate-45', 'border-[#00f0ff]');
+                trigger.classList.add('border-[#ff7f00]');
+                playHoverSound();
+            }
+        }
+    </script>
+
+    <!-- SAOシステムUI風：右サイド・折りたたみ式アコーディオンメニュー -->
+    <div class="floating-nav-container hidden md:block">
+        <!-- トリガーとなるフローティング「SYS」ボタン -->
+        <button id="menu-trigger-btn" onclick="toggleSystemMenu()" onmouseenter="playHoverSound()"
+                class="absolute right-0 top-0 -translate-y-1/2 w-12 h-12 rounded-full bg-slate-900/95 border-2 border-[#ff7f00] flex flex-col items-center justify-center glow-orange transition-all duration-300 z-50 focus:outline-none">
+            <span class="text-[9px] font-orbitron font-black text-white tracking-tighter leading-none">SYS</span>
+            <span class="text-[7px] font-orbitron text-[#ff7f00] font-bold tracking-tighter mt-0.5">MENU</span>
+        </button>
+
+        <!-- スライド展開されるメニュー本体 -->
+        <nav id="sao-system-menu" class="absolute right-16 top-0 -translate-y-1/2 flex flex-col gap-4 items-center bg-slate-950/90 border border-white/10 p-4 rounded-2xl backdrop-blur-md shadow-2xl translate-x-[150%] opacity-0 pointer-events-none transition-all duration-300 w-20">
+            <div class="text-[8px] text-[#ff7f00] font-orbitron tracking-widest mb-1 pb-1 border-b border-white/10 w-full text-center">INDEX</div>
+            <!-- 概要 -->
+            <a href="#hero" onmouseenter="playHoverSound()" onclick="toggleSystemMenu()" class="group relative flex items-center justify-center w-10 h-10 rounded-full bg-slate-800/80 border border-slate-700 hover:border-[#ff7f00] hover:bg-slate-700 transition-all duration-300 shadow-lg">
+                <span class="absolute right-12 bg-[#0a0d13] text-white text-[10px] px-2 py-0.5 rounded border border-[#ff7f00] opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap tracking-wider">01 // TOP</span>
+                <svg class="w-4 h-4 text-gray-400 group-hover:text-[#ff7f00]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>
+            </a>
+            <!-- 操作方法 -->
+            <a href="#manual" onmouseenter="playHoverSound()" onclick="toggleSystemMenu()" class="group relative flex items-center justify-center w-10 h-10 rounded-full bg-slate-800/80 border border-slate-700 hover:border-[#ff7f00] hover:bg-slate-700 transition-all duration-300 shadow-lg">
+                <span class="absolute right-12 bg-[#0a0d13] text-white text-[10px] px-2 py-0.5 rounded border border-[#ff7f00] opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap tracking-wider">02 // CONTROLS</span>
+                <svg class="w-4 h-4 text-gray-400 group-hover:text-[#ff7f00]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
+            </a>
+            <!-- ゲーム詳細 -->
+            <a href="#details" onmouseenter="playHoverSound()" onclick="toggleSystemMenu()" class="group relative flex items-center justify-center w-10 h-10 rounded-full bg-slate-800/80 border border-slate-700 hover:border-[#ff7f00] hover:bg-slate-700 transition-all duration-300 shadow-lg">
+                <span class="absolute right-12 bg-[#0a0d13] text-white text-[10px] px-2 py-0.5 rounded border border-[#ff7f00] opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap tracking-wider">03 // INVENTORY</span>
+                <svg class="w-4 h-4 text-gray-400 group-hover:text-[#ff7f00]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" /></svg>
+            </a>
+        </nav>
+    </div>
+
+    <!-- ヘッダー -->
+    <header class="w-full max-w-7xl mx-auto flex justify-between items-center px-6 py-5 border-b border-white/5 relative z-10">
+        <div class="flex items-center gap-3">
+            <!-- SAO特有のダブル菱形オレンジコアマーク -->
+            <div class="relative w-8 h-8 flex items-center justify-center">
+                <div class="absolute w-6 h-6 border-2 border-[#ff7f00] rotate-45 animate-pulse"></div>
+                <div class="absolute w-3 h-3 bg-[#ff7f00] rotate-45"></div>
+            </div>
+            <div>
+                <span class="font-orbitron font-black text-lg tracking-[0.2em] text-white">WEAPON BATTLE</span>
+                <span class="block text-[9px] text-[#00f0ff] tracking-widest font-mono">PORTAL_SYSTEM v1.3.0</span>
+            </div>
+        </div>
+        <div class="flex items-center gap-2 text-xs font-rajdhani tracking-widest text-gray-400 mr-12 md:mr-0">
+            <span class="w-2 h-2 bg-emerald-400 rounded-full animate-ping"></span>
+            <span>WORLD ID // <span class="text-white">SAO-0710</span></span>
+        </div>
     </header>
 
-    <main>
+    <!-- ヒーローセクション（アインクラッドの起動領域をイメージ） -->
+    <section id="hero" class="relative min-h-[80vh] max-w-7xl mx-auto px-6 py-12 md:py-24 flex flex-col justify-center items-start">
 
-        <section class="card">
-            <h2>Weapon Battle</h2>
-            
-            <div class="info-section">
-                <h3>■ 概要</h3>
-                <p>ここに作品の簡単な概要を書き込みます。</p>
-                
-                <h3>■ 工夫点・こだわった箇所</h3>
-                <p>・ここに工夫したポイントを自由に書き込みます。
-・デザインをSAO風のダークかつサイバーな雰囲気に統一しました。
-・HTMLとCSSだけで、軽快に動くUIウィンドウを再現しました。
-・ここをいつでもメモ帳などで開いて、追記したり編集したりできます。</p>
+        <!-- 背景の回転するSVG起動ホログラムサークル -->
+        <div class="absolute inset-0 pointer-events-none flex items-center justify-center md:justify-end opacity-20 overflow-hidden">
+            <div class="relative w-[500px] h-[500px] md:w-[700px] md:h-[700px] md:mr-12">
+                <!-- アウターループ -->
+                <svg class="holo-ring-1 absolute inset-0 w-full h-full text-white" viewBox="0 0 100 100">
+                    <circle cx="50" cy="50" r="45" fill="none" stroke="currentColor" stroke-width="0.3" stroke-dasharray="1, 4" />
+                    <circle cx="50" cy="50" r="42" fill="none" stroke="var(--sao-cyan)" stroke-width="0.5" stroke-dasharray="20, 10, 5, 10" />
+                </svg>
+                <!-- インナーループ -->
+                <svg class="holo-ring-2 absolute inset-0 w-4/5 h-4/5 m-auto text-white" viewBox="0 0 100 100">
+                    <circle cx="50" cy="50" r="45" fill="none" stroke="var(--sao-orange)" stroke-width="0.8" stroke-dasharray="40, 5, 10, 5" />
+                    <path d="M 50 2 L 52 10 L 48 10 Z" fill="var(--sao-orange)" />
+                    <path d="M 50 98 L 52 90 L 48 90 Z" fill="var(--sao-orange)" />
+                </svg>
+            </div>
+        </div>
 
-                <h3>■ 使用言語 / ツール</h3>
-                <div class="tags">
-                    <span class="tag">HTML</span>
-                    <span class="tag">CSS</span>
-                    <span class="tag">JavaScript</span>
-                </div>
+        <!-- 情報・アクション -->
+        <div class="max-w-2xl z-10 space-y-8 text-left relative">
+            <div class="inline-flex items-center gap-3 bg-white/5 border border-white/10 px-4 py-1.5 rounded-full text-xs text-[#00f0ff] font-orbitron tracking-widest glow-cyan">
+                <span class="w-1.5 h-1.5 bg-[#00f0ff] rounded-full"></span>
+                TACTICAL LINK SHIELD ACTION
             </div>
 
-            
-            <a href=" https://nto710.github.io/WeaponBattle/" target="_blank" class="btn-link">
-                Playing Game
-            </a>
-        </section>
-        </main>
+            <!-- オリジナルの巨大SAOレタリングタイトル -->
+            <div class="space-y-1">
+                <h1 class="text-5xl md:text-7xl font-orbitron font-black tracking-tighter text-white leading-none">
+                    WEAPON<br>
+                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-[#ff7f00] to-amber-400">BATTLE</span>
+                </h1>
+                <p class="text-[11px] tracking-[0.3em] text-[#00f0ff] font-orbitron pt-1">SYSTEM INSTABILITY: ACTIVE // SURVIVAL MISSION</p>
+            </div>
 
-    <footer>
-        <p>&copy; 2026 SAO Style Portfolio. All Rights Reserved.</p>
+            <p class="text-sm md:text-base text-gray-300 max-w-xl leading-relaxed font-light">
+                これは、ゲームであっても遊びではない――アインクラッドの防壁をイメージした、円形グリッド型3Dシミュレーション戦闘。「剣」「斧」「魔法」の武器の選択、スタミナが連動するダッシュと無敵回避、被弾時のHUD揺れ。そして、蓄積された魔力を解き放つ独自のソードスキル。GitHub上にデプロイされた最高峰の3Dアルゴリズムへ接続し、今すぐ戦闘を開始せよ。
+            </p>
+
+            <!-- SAO特有の決定スイッチボタン -->
+            <div class="flex flex-col sm:flex-row gap-4 justify-start pt-4">
+                <!-- LINK START（GitHub Pagesへ接続） -->
+                <a href="https://nto710.github.io/WeaponBattle/" target="_blank"
+                   onmouseenter="playHoverSound()" onclick="playConfirmSound()"
+                   class="sao-button-clip glow-orange bg-gradient-to-r from-[#ff7f00] to-amber-500 text-black font-orbitron font-black text-sm tracking-[0.2em] px-8 py-4 flex items-center justify-center gap-3 transform hover:scale-[1.03] active:scale-[0.98] transition-all duration-200">
+                    <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
+                    LINK START // PLAY GAME
+                </a>
+
+                <!-- MANUAL（操作説明へスクロール） -->
+                <a href="#manual"
+                   onmouseenter="playHoverSound()" onclick="playConfirmSound()"
+                   class="sao-button-clip bg-white/5 border border-white/20 hover:border-[#00f0ff] hover:text-[#00f0ff] text-white font-orbitron font-bold text-sm tracking-[0.2em] px-8 py-4 flex items-center justify-center gap-2 transition-all duration-200">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" /></svg>
+                    SYSTEM MANUAL
+                </a>
+            </div>
+        </div>
+
+    </section>
+
+    <!-- 操作説明セクション -->
+    <main id="manual" class="relative max-w-7xl mx-auto px-6 py-16 space-y-16">
+
+        <section class="space-y-8">
+            <!-- セクションタイトル -->
+            <div class="text-center space-y-2">
+                <div class="text-[11px] font-orbitron tracking-[0.4em] text-[#00f0ff] uppercase">Interface & Control Protocol</div>
+                <h2 class="text-2xl md:text-4xl font-black text-white tracking-widest flex items-center justify-center gap-3">
+                    <span class="inline-block w-2 h-2 bg-[#ff7f00] rotate-45"></span>
+                    SYSTEM MANUAL // 操作方法
+                    <span class="inline-block w-2 h-2 bg-[#ff7f00] rotate-45"></span>
+                </h2>
+                <div class="w-24 h-0.5 bg-gradient-to-r from-transparent via-[#ff7f00] to-transparent mx-auto mt-2"></div>
+            </div>
+
+            <!-- 操作カード：SAOインベントリ風デザイン（実際のコードに完全適合） -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+                <!-- 移動・ステップシステム -->
+                <div class="sao-clipper-l bg-slate-900/60 border border-white/10 p-6 space-y-6 hover:border-[#ff7f00]/40 transition-colors duration-300">
+                    <div class="flex items-center gap-3 border-b border-white/10 pb-3">
+                        <span class="text-xs font-orbitron text-[#ff7f00]">01 //</span>
+                        <h3 class="text-sm font-bold text-white tracking-wider">MOTION MATRIX // 移動・回避</h3>
+                    </div>
+                    <div class="space-y-4">
+                        <!-- WASD / 矢印 -->
+                        <div class="flex items-center gap-4">
+                            <div class="flex gap-1 flex-wrap">
+                                <span class="w-8 h-8 rounded border-b-2 border-slate-700 bg-slate-800 text-[11px] font-bold font-orbitron flex items-center justify-center shadow">W</span>
+                                <span class="w-8 h-8 rounded border-b-2 border-slate-700 bg-slate-800 text-[11px] font-bold font-orbitron flex items-center justify-center shadow">A</span>
+                                <span class="w-8 h-8 rounded border-b-2 border-slate-700 bg-slate-800 text-[11px] font-bold font-orbitron flex items-center justify-center shadow">S</span>
+                                <span class="w-8 h-8 rounded border-b-2 border-slate-700 bg-slate-800 text-[11px] font-bold font-orbitron flex items-center justify-center shadow">D</span>
+                            </div>
+                            <span class="text-xs text-gray-300 font-light">アバターの3D移動（矢印キー対応）</span>
+                        </div>
+                        <!-- Space -->
+                        <div class="flex items-center gap-4">
+                            <span class="px-3 py-1 rounded border-b-2 border-slate-700 bg-slate-800 text-[10px] font-bold font-orbitron shadow">Space</span>
+                            <span class="text-xs text-gray-300 font-light"><strong>無敵回避（ステップ）</strong> <span class="text-amber-500 font-mono">(スタミナ30消費)</span></span>
+                        </div>
+                        <!-- Shift -->
+                        <div class="flex items-center gap-4">
+                            <span class="px-2 py-1 rounded border-b-2 border-slate-700 bg-slate-800 text-[10px] font-bold font-orbitron shadow">Shift</span>
+                            <span class="text-xs text-gray-300 font-light"><strong>ダッシュ移動</strong> <span class="text-amber-500 font-mono">(1.6倍速/持続スタミナ消費)</span></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 戦闘コマンド -->
+                <div class="sao-clipper-l bg-slate-900/60 border border-white/10 p-6 space-y-6 hover:border-[#ff7f00]/40 transition-colors duration-300">
+                    <div class="flex items-center gap-3 border-b border-white/10 pb-3">
+                        <span class="text-xs font-orbitron text-[#ff7f00]">02 //</span>
+                        <h3 class="text-sm font-bold text-white tracking-wider">COMBAT COMMANDS // 戦闘コマンド</h3>
+                    </div>
+                    <div class="space-y-4">
+                        <!-- マウス左クリック -->
+                        <div class="flex items-center gap-4">
+                            <span class="px-2.5 py-1 rounded border-b-2 border-slate-700 bg-slate-800 text-[10px] font-bold font-orbitron shadow">L_CLICK</span>
+                            <span class="text-xs text-gray-300 font-light"><strong>通常攻撃</strong> (攻撃方向に薙ぎ払い/弾発射。命中時スキル+15%チャージ)</span>
+                        </div>
+                        <!-- マウス右クリック -->
+                        <div class="flex items-center gap-4">
+                            <span class="px-2.5 py-1 rounded border-b-2 border-slate-700 bg-slate-800 text-[10px] font-bold font-orbitron shadow">R_CLICK</span>
+                            <span class="text-xs text-gray-300 font-light"><strong>ソードスキル発動</strong> (ゲージ100%を全消費して武器特有の絶大技)</span>
+                        </div>
+                        <!-- Esc -->
+                        <div class="flex items-center gap-4">
+                            <span class="px-3 py-1 rounded border-b-2 border-slate-700 bg-slate-800 text-[10px] font-bold font-orbitron shadow">Esc</span>
+                            <span class="text-xs text-gray-300 font-light">システム一時停止（戦闘ポーズ）</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- モバイル接続 & タッチサポート（説明） -->
+                <div class="sao-clipper-l bg-slate-900/60 border border-white/10 p-6 space-y-6 hover:border-[#ff7f00]/40 transition-colors duration-300">
+                    <div class="flex items-center gap-3 border-b border-white/10 pb-3">
+                        <span class="text-xs font-orbitron text-[#ff7f00]">03 //</span>
+                        <h3 class="text-sm font-bold text-white tracking-wider">SPECIFICATION // システム仕様</h3>
+                    </div>
+                    <div class="space-y-3 text-xs">
+                        <div class="flex justify-between items-center border-b border-white/5 pb-2">
+                            <span class="text-gray-400">❤️ HP：</span>
+                            <span class="text-white font-medium">被弾で減少し、0でポーズ＆ロスト。</span>
+                        </div>
+                        <div class="flex justify-between items-center border-b border-white/5 pb-2">
+                            <span class="text-gray-400">⚡ スタミナ：</span>
+                            <span class="text-white font-medium">ダッシュ・回避で消費。停止時高速自動回復。</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-400">✨ スキル：</span>
+                            <span class="text-white font-medium">攻撃を敵に命中させるとゲージ増加。</span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- ゲーム仕様・ステータス（実際のコード値と完全結合） -->
+        <section id="details" class="space-y-8">
+            <div class="text-center space-y-2">
+                <div class="text-[11px] font-orbitron tracking-[0.4em] text-[#ff7f00] uppercase">Equipment & Quest Details</div>
+                <h2 class="text-2xl md:text-4xl font-black text-white tracking-widest flex items-center justify-center gap-3">
+                    <span class="inline-block w-2 h-2 bg-[#00f0ff] rotate-45 animate-pulse"></span>
+                    INVENTORY ARTIFACTS // ゲーム仕様
+                    <span class="inline-block w-2 h-2 bg-[#00f0ff] rotate-45 animate-pulse"></span>
+                </h2>
+                <div class="w-24 h-0.5 bg-gradient-to-r from-transparent via-[#00f0ff] to-transparent mx-auto mt-2"></div>
+            </div>
+
+            <div class="sao-clipper-r bg-slate-900/40 border border-[#00f0ff]/10 p-6 md:p-10 grid grid-cols-1 lg:grid-cols-12 gap-10 hover:border-[#00f0ff]/30 transition-all duration-500 shadow-xl">
+
+                <!-- 左側：武器イメージ・ゲームプレイ領域 -->
+                <div class="lg:col-span-5 flex flex-col justify-between gap-6">
+                    <div class="relative group overflow-hidden border border-[#00f0ff]/30 rounded-lg bg-slate-950 aspect-video flex items-center justify-center">
+                        <!-- サイバーな走査線演出 -->
+                        <div class="absolute inset-0 bg-gradient-to-b from-transparent via-[#00f0ff]/5 to-transparent bg-[length:100%_4px] pointer-events-none"></div>
+
+                        <!-- モック画像エリア -->
+                        <div class="text-center space-y-2 p-4">
+                            <svg class="w-12 h-12 text-[#00f0ff] opacity-40 mx-auto animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                            <span class="block text-xs font-orbitron text-gray-500 tracking-widest">VISUALIZED ARCHIVE WINDOW</span>
+                            <span class="block text-[10px] text-gray-400 font-medium">プレイ中の画像を入れる</span>
+                        </div>
+                    </div>
+
+                    <!-- 起動ボタン（GitHub Pagesへのダイレクトリンク） -->
+                    <a href="https://nto710.github.io/WeaponBattle/" target="_blank"
+                       onmouseenter="playHoverSound()" onclick="playConfirmSound()"
+                       class="sao-button-clip glow-cyan bg-[#00f0ff] text-black font-orbitron font-black text-sm tracking-[0.2em] py-4 text-center block transition-all duration-300 transform hover:translate-y-[-2px]">
+                        DEPLOY SYSTEM // サーバーに接続
+                    </a>
+                </div>
+
+                <!-- 右側：SAOステータス風詳細文 -->
+                <div class="lg:col-span-7 flex flex-col justify-between space-y-6">
+                    <div class="space-y-4">
+                        <div class="border-b border-white/10 pb-2">
+                            <h3 class="text-xl font-bold text-white tracking-wide">WEAPON BATTLE SYSTEM</h3>
+                            <span class="text-[10px] text-[#00f0ff] font-orbitron tracking-widest">TACTICAL TIGHT SIMULATION</span>
+                        </div>
+
+                        <!-- 概要 -->
+                        <div class="space-y-1">
+                            <h4 class="text-xs font-bold text-[#ff7f00] tracking-wider uppercase">■ 概要</h4>
+                            <p class="text-xs text-gray-300 leading-relaxed">
+                                多彩な武装とスタミナ、精密な3D光線追従照準（レイキャスト）を操り、半径30マスの円形バリアで覆われたサークル内で生き残るフル3Dサバイバルアクション。
+                            </p>
+                        </div>
+
+                        <!-- 各武器の詳細スペック（weapon-data.jsの数値と完全結合） -->
+                        <div class="space-y-1">
+                            <h4 class="text-xs font-bold text-[#ff7f00] tracking-wider uppercase">■ 実装兵装スペック</h4>
+                            <ul class="text-xs text-gray-300 space-y-2 list-none font-light">
+                                <li class="border-b border-white/5 pb-1">🛡️ <strong>剣 (Sword):</strong> HP: 120 / Speed: 0.12。攻撃範囲は2.5マスの右から左への一閃。通常攻撃CDは300ms。スキルは周囲半径4マスの全方位を高速薙ぎ払う『ソード・スピン(50dmg)』。</li>
+                                <li class="border-b border-white/5 pb-1">🪓 <strong>斧 (Axe):</strong> HP: 160 / Speed: 0.08。攻撃範囲は3.0マスの叩きおろし。通常攻撃CDは800msと長いがダメージは35と一撃必殺。スキルは最大半径6マスの敵全員に80ダメージを与えるとともに大地を激しく揺るがす『激震・地裂』。</li>
+                                <li class="border-b border-white/5 pb-1">🔮 <strong>魔法 (Magic):</strong> HP: 90 / Speed: 0.10。射程10.0、ダメージ12の魔力弾を放つ遠距離用。マウスの方向（Y=0平面）に照準リングを展開。スキル『大魔導弾』はサイズ1.8の超巨大な貫通弾（威力60）を発射し、着弾地点半径5.0の敵全員に大爆発ダメージを撒き散らし、さらに<strong>3秒間完全凍結（足止め）</strong>する。</li>
+                            </ul>
+                        </div>
+
+                        <!-- WAVE＆エネミー構成（enemy.js / game-core.jsの数値に完全結合） -->
+                        <div class="space-y-1">
+                            <h4 class="text-xs font-bold text-[#ff7f00] tracking-wider uppercase">■ WAVE構造 ＆ 支配エネミー</h4>
+                            <p class="text-xs text-gray-300 leading-relaxed font-light">
+                                <strong>【全3WAVE構成】</strong> WAVE 1（敵4体出現）➔ WAVE 2（敵7体出現）➔ WAVE 3（ボス1体＋取り巻き3体出現）<br>
+                                🔴 <strong>近接型 (Melee):</strong> HP 50 / 攻撃力 10。通常攻撃時に赤いタメ演出(0.6s)を経て強力な体当たりを仕掛けてくる。<br>
+                                🟡 <strong>遠隔型 (Range):</strong> HP 30 / 攻撃力 8。一瞬浮き上がりながら精密な魔力弾を射出してくる。<br>
+                                😈 <strong>ボス (MEGATHON):</strong> HP 500 / 攻撃力 15。WAVE 3で君臨。周囲32方向に激震弾幕を撒き散らす「全方位リング弾」と、高速で弾を連続射出する「3連バースト」を自在に切り替える脅威。
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- タグ -->
+                    <div class="space-y-2">
+                        <h4 class="text-[10px] font-orbitron text-gray-500 tracking-widest">SYSTEM SPECIFICATIONS</h4>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="bg-white/5 border border-white/10 text-gray-300 text-[10px] font-orbitron px-3 py-1 rounded">HTML5 // CANVAS</span>
+                            <span class="bg-white/5 border border-white/10 text-gray-300 text-[10px] font-orbitron px-3 py-1 rounded">THREE.JS WEBGL R128</span>
+                            <span class="bg-white/5 border border-white/10 text-gray-300 text-[10px] font-orbitron px-3 py-1 rounded">GRID CYLINDER FLOOR</span>
+                            <span class="bg-white/5 border border-white/10 text-[#00f0ff] border-[#00f0ff]/30 text-[10px] font-orbitron px-3 py-1 rounded">BILLBOARD HP INDICATOR</span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+    </main>
+
+    <!-- フッター -->
+    <footer class="w-full text-center border-t border-white/5 py-10 mt-16 bg-[#06090c]/80 backdrop-blur">
+        <div class="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-gray-500">
+            <div class="flex items-center gap-2">
+                <span class="w-2 h-2 bg-[#ff7f00] rotate-45"></span>
+                <span>SAO STYLE FANDOM WORKS // <span class="text-white font-orbitron">PORTFOLIO 2026</span></span>
+            </div>
+            <p>&copy; 2026 Weapon Battle Project. All Rights Reserved.</p>
+        </div>
     </footer>
 
 </body>
